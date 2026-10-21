@@ -4,13 +4,11 @@ import {
   Copy,
   Check,
   Sparkles,
-  Link2,
   FileJson,
   Sliders,
   Plus,
   Trash2,
   AlertCircle,
-  ArrowUpRight,
   RotateCcw,
   Layers,
   CheckCircle2,
@@ -43,7 +41,21 @@ interface BatchItem {
   tour?: TourDocument;
 }
 
+interface UploadedScreenshot {
+  id: string;
+  name: string;
+  previewUrl: string;
+  mimeType: string;
+  data: string;
+}
+
 const PRESET_SOURCES = [
+  {
+    label: "GetYourGuide: Lempuyang & Water Palace",
+    ota: "GetYourGuide",
+    value:
+      "https://www.getyourguide.com/bali-l347/bali-lempuyang-quick-access-waterfall-water-palace-more-t487494"
+  },
   {
     label: "GetYourGuide: Mount Agung Trek",
     ota: "GetYourGuide",
@@ -54,12 +66,6 @@ const PRESET_SOURCES = [
     label: "Klook: Short Link Sample",
     ota: "Klook",
     value: "https://s.klook.com/c/ZyzrNjr5XP"
-  },
-  {
-    label: "Prompt: Nusa Penida Private Tour",
-    ota: "Prompt",
-    value:
-      "Create a full-day Nusa Penida West & Diamond Beach Private Tour with Manta Bay snorkeling from Bali. Includes fast boat return tickets, private AC car on the island, English speaking driver/photographer, lunch, and hotel transfers."
   }
 ];
 
@@ -86,7 +92,7 @@ export default function App() {
   >("json");
 
   const [inputText, setInputText] = useState<string>(
-    "https://www.getyourguide.com/bali-l347/bali-mount-agung-sunrise-trekking-experience-t392586/"
+    "https://www.getyourguide.com/bali-l347/bali-lempuyang-quick-access-waterfall-water-palace-more-t487494"
   );
   const [batchInputText, setBatchInputText] = useState<string>(
     "https://s.klook.com/c/ZyzrNjr5XP\nhttps://www.getyourguide.com/bali-l347/bali-mount-agung-sunrise-trekking-experience-t392586/"
@@ -107,12 +113,15 @@ export default function App() {
   const [isExtracting, setIsExtracting] = useState<boolean>(false);
   const [extractionError, setExtractionError] = useState<string | null>(null);
   const [copiedState, setCopiedState] = useState<boolean>(false);
+  const [clipperCopied, setClipperCopied] = useState<boolean>(false);
+
+  const [extraOptionsText, setExtraOptionsText] = useState<string>("");
+  const [screenshots, setScreenshots] = useState<UploadedScreenshot[]>([]);
 
   const [history, setHistory] = useState<ExtractionHistoryItem[]>([
     {
       id: "ref-batur-1839",
-      sourceInput:
-        "tour-mount-batur-sunrise-gold-black-lava-4x4-jeep-adventure-1839.json",
+      sourceInput: "jsonfiles_f96e158d.json",
       sourceType: "Reference",
       otaName: "Reference Sample",
       createdAt: "Loaded from attachment",
@@ -124,6 +133,65 @@ export default function App() {
 
   const [batchQueue, setBatchQueue] = useState<BatchItem[]>([]);
   const [isRunningBatch, setIsRunningBatch] = useState<boolean>(false);
+
+  const handleFilesSelected = (files: FileList | File[] | null) => {
+    if (!files) return;
+    Array.from(files).forEach((file) => {
+      if (!file.type.startsWith("image/")) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const resultStr = String(reader.result || "");
+        const base64Data = resultStr.includes(",")
+          ? resultStr.split(",")[1] || ""
+          : "";
+        if (base64Data) {
+          setScreenshots((prev) => [
+            ...prev,
+            {
+              id: `shot-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+              name: file.name || "availability-screenshot.png",
+              previewUrl: resultStr,
+              mimeType: file.type || "image/png",
+              data: base64Data
+            }
+          ]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handlePasteScreenshot = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    const imageFiles: File[] = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item && item.type.startsWith("image/")) {
+        const file = item.getAsFile();
+        if (file) imageFiles.push(file);
+      }
+    }
+    if (imageFiles.length > 0) {
+      e.preventDefault();
+      handleFilesSelected(imageFiles);
+    }
+  };
+
+  const handleCopyBrowserClipper = async () => {
+    const script = `(() => {
+  const imgs = Array.from(document.querySelectorAll('img')).map(i => i.src || i.getAttribute('data-src')).filter(u => u && /^https?:\\/\\//.test(u) && !u.includes('avatar') && !u.includes('logo') && !u.endsWith('.svg')).slice(0, 15);
+  const payload = "URL: " + location.href + "\\nTITLE: " + document.title + "\\nIMAGES:\\n" + [...new Set(imgs)].join("\\n") + "\\n\\nEXPANDED PAGE & AVAILABILITY OPTIONS:\\n" + document.body.innerText;
+  navigator.clipboard.writeText(payload).then(() => alert("Copied full OTA Tour & Availability Options to clipboard! Paste into TourJSON Studio."));
+})();`;
+    try {
+      await navigator.clipboard.writeText(script);
+      setClipperCopied(true);
+      setTimeout(() => setClipperCopied(false), 2500);
+    } catch {
+      // Ignore clipboard error
+    }
+  };
 
   const updateCurrentTourAndDraft = (updated: TourDocument) => {
     const normalized = normalizeToExactTourSchema(updated, tenantDefaults);
@@ -157,8 +225,10 @@ export default function App() {
 
   const handleExtractSingle = async (overrideInput?: string) => {
     const targetInput = (overrideInput ?? inputText).trim();
-    if (!targetInput) {
-      setExtractionError("Please paste an OTA URL or tour prompt first.");
+    if (!targetInput && !extraOptionsText.trim() && screenshots.length === 0) {
+      setExtractionError(
+        "Please paste an OTA URL, availability options text, or screenshot first."
+      );
       return;
     }
 
@@ -171,7 +241,12 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           input: targetInput,
-          tenantDefaults
+          tenantDefaults,
+          extraOptionsText,
+          screenshots: screenshots.map((s) => ({
+            mimeType: s.mimeType,
+            data: s.data
+          }))
         })
       });
 
@@ -198,7 +273,7 @@ export default function App() {
 
       const newItem: ExtractionHistoryItem = {
         id: `ext-${Date.now()}`,
-        sourceInput: targetInput,
+        sourceInput: targetInput || "Availability Screenshot / Copy",
         sourceType: /https?:\/\//i.test(targetInput) ? "OTA URL" : "Prompt",
         otaName: detectOtaPlatform(targetInput),
         createdAt: new Date().toLocaleTimeString([], {
@@ -364,7 +439,12 @@ export default function App() {
           : typeof val === "object"
           ? JSON.stringify(val).slice(0, 42)
           : String(val).slice(0, 48);
-      return { key, exists, valuePreview, type: Array.isArray(val) ? "array" : typeof val };
+      return {
+        key,
+        exists,
+        valuePreview,
+        type: Array.isArray(val) ? "array" : typeof val
+      };
     });
     const matchedCount = results.filter((r) => r.exists).length;
     return {
@@ -387,7 +467,6 @@ export default function App() {
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-[#0F172A]">
       {/* Top Bar Contract: 3 zones separated by gap-8 */}
       <header className="flex items-center justify-between gap-8 px-6 py-3.5 bg-white border-b border-slate-200 sticky top-0 z-30">
-        {/* Zone 1: Single text element wordmark */}
         <a
           href="#top"
           onClick={(e) => {
@@ -399,7 +478,6 @@ export default function App() {
           TourJSON Studio
         </a>
 
-        {/* Zone 2: 4 concise single-line text navigation links */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
           <button
             type="button"
@@ -456,7 +534,6 @@ export default function App() {
           </button>
         </nav>
 
-        {/* Zone 3: 1 primary action */}
         <div className="flex items-center gap-3 shrink-0">
           <button
             type="button"
@@ -469,9 +546,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Workspace Container (1440px max-width with high-density 2-column layout) */}
       <main className="flex-1 w-full max-w-[1440px] mx-auto px-6 py-6">
-        {/* Contextual Workspace Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-5 mb-6 border-b border-slate-200">
           <div>
             <div className="flex items-center gap-2 text-xs text-slate-500 mb-1.5 tabular-nums">
@@ -487,7 +562,7 @@ export default function App() {
               <span>{jsonByteSize} KB</span>
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 font-display">
-              OTA URL &amp; Prompt to Tour JSON Generator
+              OTA URL &amp; Availability Package to JSON Generator
             </h1>
           </div>
 
@@ -501,7 +576,7 @@ export default function App() {
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-              Load Attached Reference JSON
+              Load Reference JSON
             </button>
             <button
               type="button"
@@ -523,7 +598,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Optional Tenant Defaults Drawer when selected */}
         {activeSection === "defaults" && (
           <section className="mb-6 bg-white border border-slate-200 rounded-xl p-6">
             <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
@@ -561,13 +635,12 @@ export default function App() {
                 <input
                   type="text"
                   value={tenantDefaults.tenantId}
-                  onChange={(e) => {
-                    const next = {
+                  onChange={(e) =>
+                    setTenantDefaults({
                       ...tenantDefaults,
                       tenantId: e.target.value
-                    };
-                    setTenantDefaults(next);
-                  }}
+                    })
+                  }
                   className="w-full px-3 py-2 text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-900"
                 />
               </div>
@@ -578,13 +651,12 @@ export default function App() {
                 <input
                   type="text"
                   value={tenantDefaults.categoryId}
-                  onChange={(e) => {
-                    const next = {
+                  onChange={(e) =>
+                    setTenantDefaults({
                       ...tenantDefaults,
                       categoryId: e.target.value
-                    };
-                    setTenantDefaults(next);
-                  }}
+                    })
+                  }
                   className="w-full px-3 py-2 text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-900"
                 />
               </div>
@@ -595,13 +667,12 @@ export default function App() {
                 <input
                   type="text"
                   value={tenantDefaults.locationId}
-                  onChange={(e) => {
-                    const next = {
+                  onChange={(e) =>
+                    setTenantDefaults({
                       ...tenantDefaults,
                       locationId: e.target.value
-                    };
-                    setTenantDefaults(next);
-                  }}
+                    })
+                  }
                   className="w-full px-3 py-2 text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-900"
                 />
               </div>
@@ -612,13 +683,12 @@ export default function App() {
                 <input
                   type="text"
                   value={tenantDefaults.imageLabelId}
-                  onChange={(e) => {
-                    const next = {
+                  onChange={(e) =>
+                    setTenantDefaults({
                       ...tenantDefaults,
                       imageLabelId: e.target.value
-                    };
-                    setTenantDefaults(next);
-                  }}
+                    })
+                  }
                   className="w-full px-3 py-2 text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-900"
                 />
               </div>
@@ -629,13 +699,12 @@ export default function App() {
                 <input
                   type="text"
                   value={tenantDefaults.primaryTransportId}
-                  onChange={(e) => {
-                    const next = {
+                  onChange={(e) =>
+                    setTenantDefaults({
                       ...tenantDefaults,
                       primaryTransportId: e.target.value
-                    };
-                    setTenantDefaults(next);
-                  }}
+                    })
+                  }
                   className="w-full px-3 py-2 text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-900"
                 />
               </div>
@@ -668,24 +737,20 @@ export default function App() {
           </section>
         )}
 
-        {/* Primary 12-Column Split Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* LEFT COLUMN (5 cols): Source URL / Prompt Input + History */}
+          {/* LEFT COLUMN (5 cols) */}
           <div className="lg:col-span-5 flex flex-col gap-6">
-            {/* Extraction Input Panel */}
             <section className="bg-white border border-slate-200 rounded-xl p-5">
               <div className="flex items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-100">
                 <div>
                   <h2 className="text-sm font-semibold text-slate-900">
-                    01. Source Input
+                    01. Source Input &amp; Availability Capture
                   </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Paste a Viator, GetYourGuide, or Klook URL, raw tour copy,
-                    or prompt
+                    Paste OTA URL + screenshot or expanded availability options
                   </p>
                 </div>
 
-                {/* Segmented Interactive Mode Switcher */}
                 <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-lg shrink-0">
                   <button
                     type="button"
@@ -714,10 +779,9 @@ export default function App() {
 
               {inputMode === "single" ? (
                 <>
-                  {/* Quick Sample Presets from User Request */}
                   <div className="mb-3">
                     <div className="text-xs font-medium text-slate-600 mb-2">
-                      Quick-load sample URLs or prompts:
+                      Quick-load sample URLs:
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {PRESET_SOURCES.map((preset) => (
@@ -736,8 +800,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* URL or Prompt Textarea */}
-                  <div className="mb-3">
+                  <div className="mb-3" onPaste={handlePasteScreenshot}>
                     <div className="flex items-center justify-between text-xs text-slate-500 mb-1.5">
                       <span className="font-medium text-slate-700">
                         OTA Listing URL or Tour Description
@@ -750,12 +813,151 @@ export default function App() {
                       </span>
                     </div>
                     <textarea
-                      rows={5}
+                      rows={2}
                       value={inputText}
                       onChange={(e) => setInputText(e.target.value)}
-                      placeholder="Paste URL (e.g., https://www.getyourguide.com/... or https://s.klook.com/...) or describe the tour itinerary, packages, and pricing..."
-                      className="w-full p-3 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:bg-white focus:border-slate-900 transition-colors font-mono"
+                      placeholder="Paste URL (e.g., https://www.getyourguide.com/bali-l347/bali-lempuyang-quick-access-waterfall-water-palace-more-t487494)..."
+                      className="w-full p-3 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:bg-white focus:border-slate-900 transition-colors font-mono"
                     />
+                  </div>
+
+                  {/* Dynamic "Check Availability" Packages Capture Box */}
+                  <div
+                    className="mb-3 p-3.5 bg-slate-50 border border-slate-200 rounded-lg space-y-3"
+                    onPaste={handlePasteScreenshot}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="text-xs font-semibold text-slate-900">
+                          Capture "Check Availability" Packages
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                          When OTAs hide options behind{" "}
+                          <strong className="font-medium text-slate-700">
+                            Check availability
+                          </strong>
+                          , paste a{" "}
+                          <strong className="font-medium text-slate-700">
+                            screenshot (Cmd+V)
+                          </strong>{" "}
+                          of the option cards or copy/paste the option text:
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleCopyBrowserClipper}
+                        className="px-2.5 py-1 text-[11px] font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-md whitespace-nowrap shrink-0 cursor-pointer"
+                        title="Copy a 1-click browser console script to grab all expanded options and images from the active OTA tab"
+                      >
+                        {clipperCopied
+                          ? "Clipper Copied!"
+                          : "Copy Browser Clipper"}
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label className="flex items-center justify-between px-3 py-2 bg-white border border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-slate-900 transition-colors text-xs">
+                        <span className="text-slate-600">
+                          Drop or{" "}
+                          <strong className="text-slate-900">
+                            Paste (Cmd+V)
+                          </strong>{" "}
+                          screenshot of OTA "Available options"
+                        </span>
+                        <span className="px-2 py-0.5 text-[11px] font-medium bg-slate-100 text-slate-800 rounded">
+                          Upload Screenshot
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={(e) => handleFilesSelected(e.target.files)}
+                          className="hidden"
+                        />
+                      </label>
+
+                      {screenshots.length > 0 && (
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          {screenshots.map((shot) => (
+                            <div
+                              key={shot.id}
+                              className="relative group w-20 h-14 rounded border border-slate-200 overflow-hidden bg-white"
+                            >
+                              <img
+                                src={shot.previewUrl}
+                                alt={shot.name}
+                                className="w-full h-full object-cover"
+                              />
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setScreenshots((prev) =>
+                                    prev.filter((s) => s.id !== shot.id)
+                                  )
+                                }
+                                className="absolute top-0.5 right-0.5 bg-slate-900/80 text-white rounded p-0.5 text-[10px] cursor-pointer"
+                                title="Remove screenshot"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <textarea
+                        rows={3}
+                        value={extraOptionsText}
+                        onChange={(e) => setExtraOptionsText(e.target.value)}
+                        placeholder="Or select & copy (Cmd+C) the expanded package cards on GetYourGuide/Klook/Viator (e.g., 'Group Tour without Entrance Fees from South Bali - Rp 269,437...') and paste here..."
+                        className="w-full p-2.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-slate-900 font-mono"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                          Package Structure Mode
+                        </label>
+                        <select
+                          value={tenantDefaults.packageMode || "exact_ota"}
+                          onChange={(e) =>
+                            setTenantDefaults((prev) => ({
+                              ...prev,
+                              packageMode: e.target.value as
+                                | "exact_ota"
+                                | "three_tier_template"
+                            }))
+                          }
+                          className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-md focus:outline-none focus:border-slate-900"
+                        >
+                          <option value="exact_ota">
+                            Match Exact OTA Packages
+                          </option>
+                          <option value="three_tier_template">
+                            3-Tier Template (Easy / Comfy / Exclusive)
+                          </option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                          IDR (Rp) to 1 USD Rate
+                        </label>
+                        <input
+                          type="number"
+                          value={tenantDefaults.idrToUsdRate || 16000}
+                          onChange={(e) =>
+                            setTenantDefaults((prev) => ({
+                              ...prev,
+                              idrToUsdRate: Number(e.target.value) || 16000
+                            }))
+                          }
+                          className="w-full px-2.5 py-1.5 text-xs font-mono bg-white border border-slate-200 rounded-md focus:outline-none focus:border-slate-900"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <div className="mb-3 flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs">
@@ -796,13 +998,15 @@ export default function App() {
                     >
                       <Sparkles className="w-4 h-4" />
                       {isExtracting
-                        ? "Extracting OTA Data & Images..."
+                        ? "Extracting OTA Packages & Mapping Schema..."
                         : "Extract & Generate JSON"}
                     </button>
                     <button
                       type="button"
                       onClick={() => {
                         setInputText("");
+                        setExtraOptionsText("");
+                        setScreenshots([]);
                         setExtractionError(null);
                       }}
                       className="px-3 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border border-slate-200 rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
@@ -812,7 +1016,6 @@ export default function App() {
                   </div>
                 </>
               ) : (
-                /* Batch Mode */
                 <>
                   <div className="mb-3">
                     <label className="block text-xs font-medium text-slate-700 mb-1.5">
@@ -895,7 +1098,7 @@ export default function App() {
               )}
             </section>
 
-            {/* Active Tour Summary & Quick Website Import Card */}
+            {/* Active Tour Summary */}
             <section className="bg-white border border-slate-200 rounded-xl p-5">
               <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
                 <h2 className="text-sm font-semibold text-slate-900">
@@ -941,12 +1144,13 @@ export default function App() {
 
                 <div className="flex items-center justify-between text-slate-600 tabular-nums">
                   <span>
-                    {currentTour.highlights?.length || 0} Highlights ·{" "}
+                    {currentTour.packages?.length || 0} Packages ·{" "}
                     {currentTour.itinerary?.length || 0} Stops ·{" "}
                     {currentTour.gallery?.length || 0} Gallery Photos
                   </span>
                   {(currentTour.featuredImage ||
-                    (currentTour.gallery && currentTour.gallery.length > 0)) && (
+                    (currentTour.gallery &&
+                      currentTour.gallery.length > 0)) && (
                     <button
                       type="button"
                       onClick={() =>
@@ -983,8 +1187,9 @@ export default function App() {
                           referrerPolicy="no-referrer"
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            (e.currentTarget as HTMLImageElement).style.display =
-                              "none";
+                            (
+                              e.currentTarget as HTMLImageElement
+                            ).style.display = "none";
                           }}
                         />
                       </a>
@@ -1021,7 +1226,9 @@ export default function App() {
                     <div
                       key={item.id}
                       className={`py-3 first:pt-0 last:pb-0 flex items-start justify-between gap-3 ${
-                        isSelected ? "opacity-100" : "opacity-85 hover:opacity-100"
+                        isSelected
+                          ? "opacity-100"
+                          : "opacity-85 hover:opacity-100"
                       }`}
                     >
                       <button
@@ -1063,9 +1270,8 @@ export default function App() {
             </section>
           </div>
 
-          {/* RIGHT COLUMN (7 cols): Live JSON Output / Visual Form Editor / Schema Audit */}
+          {/* RIGHT COLUMN (7 cols) */}
           <div className="lg:col-span-7 bg-white border border-slate-200 rounded-xl overflow-hidden flex flex-col">
-            {/* Right Pane Toolbar */}
             <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 bg-slate-50/70 border-b border-slate-200">
               <div className="flex items-center gap-1 p-1 bg-slate-200/70 rounded-lg">
                 <button
@@ -1135,7 +1341,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Right Pane Body */}
             {rightPaneTab === "json" && (
               <div className="flex flex-col flex-1">
                 <div className="flex items-center justify-between px-5 py-2 bg-slate-900 text-slate-400 text-xs font-mono border-b border-slate-800">
@@ -1157,14 +1362,13 @@ export default function App() {
                   value={rawJsonDraft}
                   onChange={(e) => handleRawJsonChange(e.target.value)}
                   spellCheck={false}
-                  className="w-full h-[680px] p-5 bg-[#0F172A] text-slate-100 font-mono text-xs leading-relaxed focus:outline-none resize-y"
+                  className="w-full h-[760px] p-5 bg-[#0F172A] text-slate-100 font-mono text-xs leading-relaxed focus:outline-none resize-y"
                 />
               </div>
             )}
 
             {rightPaneTab === "visual" && (
-              <div className="p-5 space-y-6 max-h-[720px] overflow-y-auto">
-                {/* Basic Tour Identity */}
+              <div className="p-5 space-y-6 max-h-[780px] overflow-y-auto">
                 <div className="space-y-4">
                   <h3 className="text-xs font-semibold text-slate-900 border-b border-slate-100 pb-2">
                     Core Tour Identity &amp; Pricing
@@ -1486,7 +1690,8 @@ export default function App() {
                             {
                               day: 1,
                               title: `Stop ${currentTour.itinerary.length + 1}`,
-                              description: "Describe the experience at this stop.",
+                              description:
+                                "Describe the experience at this stop.",
                               image: ""
                             }
                           ]
@@ -1581,10 +1786,10 @@ export default function App() {
                                 packages: next
                               });
                             }}
-                            className="px-2.5 py-1 text-xs font-semibold bg-white border border-slate-200 rounded"
+                            className="flex-1 px-2.5 py-1 text-xs font-semibold bg-white border border-slate-200 rounded"
                           />
-                          <span className="text-xs text-slate-500 font-mono tabular-nums">
-                            {pkg.tiers.length} pricing tiers
+                          <span className="text-xs text-slate-500 font-mono tabular-nums shrink-0">
+                            {pkg.meetingPointType} · {pkg.tiers.length} tiers
                           </span>
                         </div>
 
@@ -1595,8 +1800,7 @@ export default function App() {
                             const next = [...currentTour.packages];
                             next[pIdx] = {
                               ...pkg,
-                              description: e.target.value,
-                              details: e.target.value
+                              description: e.target.value
                             };
                             updateCurrentTourAndDraft({
                               ...currentTour,
@@ -1653,7 +1857,7 @@ export default function App() {
             )}
 
             {rightPaneTab === "schema" && (
-              <div className="p-5 max-h-[720px] overflow-y-auto">
+              <div className="p-5 max-h-[780px] overflow-y-auto">
                 <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                   <div>
                     <h3 className="text-sm font-semibold text-slate-900">

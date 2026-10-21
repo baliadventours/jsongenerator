@@ -3,32 +3,45 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import { DEFAULT_TENANT_CONFIG, TenantDefaults } from "./src/types/tour";
-import { processTourExtraction } from "./api/extract-tour";
+import { processTourExtraction, ScreenshotInput } from "./api/extract-tour";
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json({ limit: "5mb" }));
+  app.use(express.json({ limit: "15mb" }));
 
   app.post("/api/extract-tour", async (req, res) => {
     try {
       const {
-        input,
-        tenantDefaults = DEFAULT_TENANT_CONFIG
+        input = "",
+        tenantDefaults = DEFAULT_TENANT_CONFIG,
+        extraOptionsText = "",
+        screenshots = []
       }: {
         input?: string;
         tenantDefaults?: TenantDefaults;
+        extraOptionsText?: string;
+        screenshots?: ScreenshotInput[];
       } = req.body || {};
 
-      if (!input || !input.trim()) {
+      if (
+        !input.trim() &&
+        !extraOptionsText.trim() &&
+        (!Array.isArray(screenshots) || screenshots.length === 0)
+      ) {
         return res.status(400).json({
           error:
-            "Please provide an OTA URL (Viator, GetYourGuide, Klook, etc.) or a tour description prompt."
+            "Please provide an OTA URL, availability screenshot, or tour description."
         });
       }
 
-      const result = await processTourExtraction(input, tenantDefaults);
+      const result = await processTourExtraction(
+        input,
+        tenantDefaults,
+        extraOptionsText,
+        screenshots
+      );
       return res.json(result);
     } catch (error: any) {
       console.error("Error in /api/extract-tour:", error);

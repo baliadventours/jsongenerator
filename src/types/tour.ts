@@ -114,6 +114,8 @@ export interface TenantDefaults {
   primaryTransportId: string;
   packageTransportIds: string[];
   includeSourceImages?: boolean;
+  packageMode?: "exact_ota" | "three_tier_template";
+  idrToUsdRate?: number;
 }
 
 export const DEFAULT_TENANT_CONFIG: TenantDefaults = {
@@ -139,7 +141,9 @@ export const DEFAULT_TENANT_CONFIG: TenantDefaults = {
     "JZqqdiIEXOyH1deMyXCv",
     "AUCf2PF7GdGDTzQZoo7u"
   ],
-  includeSourceImages: true
+  includeSourceImages: true,
+  packageMode: "exact_ota",
+  idrToUsdRate: 16000
 };
 
 export const SAMPLE_MOUNT_BATUR_TOUR: TourDocument = {
