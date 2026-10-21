@@ -115,6 +115,7 @@ export interface TenantDefaults {
   cutOffHours: number;
   primaryTransportId: string;
   packageTransportIds: string[];
+  includeSourceImages?: boolean;
 }
 
 const FALLBACK_TENANT_CONFIG: TenantDefaults = {
@@ -139,7 +140,8 @@ const FALLBACK_TENANT_CONFIG: TenantDefaults = {
     "zzzwN7Ua6wjps97LpjpQ",
     "JZqqdiIEXOyH1deMyXCv",
     "AUCf2PF7GdGDTzQZoo7u"
-  ]
+  ],
+  includeSourceImages: true
 };
 
 const DEFAULT_ADDON_IDS = [
@@ -156,6 +158,7 @@ interface ScrapedUrlMetadata {
   metaDescription: string;
   ldJsonBlocks: string[];
   bodyExcerpt: string;
+  extractedImages: string[];
 }
 
 function extractSlugHintFromUrl(urlStr: string): string {
@@ -171,6 +174,69 @@ function extractSlugHintFromUrl(urlStr: string): string {
   }
 }
 
+function isLikelyTourPhotoUrl(rawUrl: string): boolean {
+  if (!rawUrl || !/^https?:\/\//i.test(rawUrl)) return false;
+  const lower = rawUrl.toLowerCase();
+  // Exclude icons, logos, flags, avatars, tracking pixels, and SVGs
+  if (
+    lower.endsWith(".svg") ||
+    lower.endsWith(".gif") ||
+    lower.endsWith(".ico") ||
+    lower.includes("logo") ||
+    lower.includes("avatar") ||
+    lower.includes("favicon") ||
+    lower.includes("sprite") ||
+    lower.includes("icon") ||
+    lower.includes("flag") ||
+    lower.includes("badge") ||
+    lower.includes("payment") ||
+    lower.includes("1x1") ||
+    lower.includes("pixel")
+  ) {
+    return false;
+  }
+  return (
+    lower.includes("cdn.getyourguide.com/img/tour") ||
+    lower.includes("cdn.getyourguide.com/img/location") ||
+    lower.includes("res.klook.com/images/") ||
+    lower.includes("res.klook.com/image/upload") ||
+    lower.includes("media.tacdn.com/media/attractions") ||
+    lower.includes("dynamic-media-cdn.tripadvisor.com") ||
+    /\.(jpe?g|png|webp)(\?.*)?$/i.test(lower)
+  );
+}
+
+function collectImagesFromJsonNode(node: any, out: Set<string>) {
+  if (!node || out.size >= 16) return;
+  if (typeof node === "string") {
+    if (isLikelyTourPhotoUrl(node)) {
+      out.add(node);
+    }
+    return;
+  }
+  if (Array.isArray(node)) {
+    for (const item of node) {
+      collectImagesFromJsonNode(item, out);
+    }
+    return;
+  }
+  if (typeof node === "object") {
+    for (const [k, v] of Object.entries(node)) {
+      const keyLower = k.toLowerCase();
+      if (
+        keyLower.includes("image") ||
+        keyLower.includes("photo") ||
+        keyLower === "contenturl" ||
+        keyLower === "thumbnailurl"
+      ) {
+        collectImagesFromJsonNode(v, out);
+      } else if (typeof v === "object") {
+        collectImagesFromJsonNode(v, out);
+      }
+    }
+  }
+}
+
 async function inspectUrlContent(rawUrl: string): Promise<ScrapedUrlMetadata> {
   const result: ScrapedUrlMetadata = {
     originalUrl: rawUrl,
@@ -179,12 +245,15 @@ async function inspectUrlContent(rawUrl: string): Promise<ScrapedUrlMetadata> {
     pageTitle: "",
     metaDescription: "",
     ldJsonBlocks: [],
-    bodyExcerpt: ""
+    bodyExcerpt: "",
+    extractedImages: []
   };
+
+  const imageSet = new Set<string>();
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 2500);
+    const timeout = setTimeout(() => controller.abort(), 3000);
 
     const response = await fetch(rawUrl, {
       method: "GET",
@@ -207,48 +276,115 @@ async function inspectUrlContent(rawUrl: string): Promise<ScrapedUrlMetadata> {
     }
 
     const html = await response.text();
-    if (!html) return result;
+    if (html) {
+      const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+      if (titleMatch?.[1]) {
+        result.pageTitle = titleMatch[1].replace(/\s+/g, " ").trim();
+      }
 
-    const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-    if (titleMatch?.[1]) {
-      result.pageTitle = titleMatch[1].replace(/\s+/g, " ").trim();
-    }
+      const descMatch =
+        html.match(
+          /<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i
+        ) ||
+        html.match(
+          /<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)["']/i
+        );
+      if (descMatch?.[1]) {
+        result.metaDescription = descMatch[1].replace(/\s+/g, " ").trim();
+      }
 
-    const descMatch =
-      html.match(
-        /<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i
-      ) ||
-      html.match(
-        /<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)["']/i
+      // 1. Extract og:image & twitter:image meta tags
+      const metaImageMatches = html.matchAll(
+        /<meta[^>]+(?:property|name)=["'](?:og:image|twitter:image)["'][^>]+content=["']([^"']+)["']/gi
       );
-    if (descMatch?.[1]) {
-      result.metaDescription = descMatch[1].replace(/\s+/g, " ").trim();
-    }
-
-    const ldMatches = html.matchAll(
-      /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi
-    );
-    for (const match of ldMatches) {
-      if (match[1]) {
-        const cleaned = match[1].trim();
-        if (cleaned.length > 10 && result.ldJsonBlocks.length < 3) {
-          result.ldJsonBlocks.push(cleaned.slice(0, 3500));
+      for (const m of metaImageMatches) {
+        if (m[1] && isLikelyTourPhotoUrl(m[1])) {
+          imageSet.add(m[1].replace(/&amp;/g, "&"));
         }
       }
+      const reverseMetaImageMatches = html.matchAll(
+        /<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:image|twitter:image)["']/gi
+      );
+      for (const m of reverseMetaImageMatches) {
+        if (m[1] && isLikelyTourPhotoUrl(m[1])) {
+          imageSet.add(m[1].replace(/&amp;/g, "&"));
+        }
+      }
+
+      // 2. Extract images from LD+JSON blocks
+      const ldMatches = html.matchAll(
+        /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi
+      );
+      for (const match of ldMatches) {
+        if (match[1]) {
+          const cleaned = match[1].trim();
+          if (cleaned.length > 10 && result.ldJsonBlocks.length < 3) {
+            result.ldJsonBlocks.push(cleaned.slice(0, 3500));
+          }
+          try {
+            const parsedLd = JSON.parse(cleaned);
+            collectImagesFromJsonNode(parsedLd, imageSet);
+          } catch {
+            // Ignore malformed JSON-LD
+          }
+        }
+      }
+
+      // 3. Extract direct OTA CDN tour photo URLs embedded in HTML / SSR state
+      const otaCdnMatches = html.matchAll(
+        /https?:\/\/(?:cdn\.getyourguide\.com\/img\/tour|res\.klook\.com\/images|res\.klook\.com\/image\/upload|media\.tacdn\.com\/media\/attractions)[^\s"'<>\\]+/gi
+      );
+      for (const m of otaCdnMatches) {
+        if (m[0] && imageSet.size < 14) {
+          const cleanUrl = m[0].replace(/&amp;/g, "&");
+          if (isLikelyTourPhotoUrl(cleanUrl)) {
+            imageSet.add(cleanUrl);
+          }
+        }
+      }
+
+      const strippedText = html
+        .replace(/<script[\s\S]*?<\/script>/gi, " ")
+        .replace(/<style[\s\S]*?<\/style>/gi, " ")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      result.bodyExcerpt = strippedText.slice(0, 4500);
     }
-
-    const strippedText = html
-      .replace(/<script[\s\S]*?<\/script>/gi, " ")
-      .replace(/<style[\s\S]*?<\/style>/gi, " ")
-      .replace(/<[^>]+>/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-
-    result.bodyExcerpt = strippedText.slice(0, 4500);
   } catch {
-    // Fallback to URL slug hint and Gemini knowledge
+    // Direct fetch blocked or timed out
   }
 
+  // 4. If direct fetch was blocked by anti-bot protection and found 0 images, query Microlink metadata API (fast 2.2s timeout)
+  if (imageSet.size === 0) {
+    try {
+      const mlController = new AbortController();
+      const mlTimeout = setTimeout(() => mlController.abort(), 2200);
+      const mlRes = await fetch(
+        `https://api.microlink.io/?url=${encodeURIComponent(result.resolvedUrl)}`,
+        { signal: mlController.signal }
+      );
+      clearTimeout(mlTimeout);
+      if (mlRes.ok) {
+        const mlData: any = await mlRes.json();
+        const imgUrl = mlData?.data?.image?.url;
+        if (imgUrl && typeof imgUrl === "string" && /^https?:\/\//i.test(imgUrl)) {
+          imageSet.add(imgUrl);
+        }
+        if (!result.pageTitle && mlData?.data?.title) {
+          result.pageTitle = mlData.data.title;
+        }
+        if (!result.metaDescription && mlData?.data?.description) {
+          result.metaDescription = mlData.data.description;
+        }
+      }
+    } catch {
+      // Ignore Microlink fallback timeout
+    }
+  }
+
+  result.extractedImages = Array.from(imageSet).slice(0, 12);
   return result;
 }
 
@@ -547,10 +683,12 @@ export async function processTourExtraction(
   const detectedUrls = trimmedInput.match(urlRegex) || [];
 
   let scrapedContext = "";
+  let extractedImages: string[] = [];
 
   if (detectedUrls.length > 0) {
     const primaryUrl = detectedUrls[0] ?? trimmedInput;
     const scraped = await inspectUrlContent(primaryUrl);
+    extractedImages = scraped.extractedImages;
 
     scrapedContext = [
       `Original URL: ${scraped.originalUrl}`,
@@ -610,6 +748,9 @@ ${scrapedContext ? `SCRAPED URL METADATA:\n${scrapedContext}\n` : ""}`;
     ...(tenantDefaults || {})
   };
 
+  const shouldPopulateImages =
+    safeDefaults.includeSourceImages !== false && extractedImages.length > 0;
+
   const formattedItinerary: TourItineraryStep[] = Array.isArray(
     parsed.itinerary
   )
@@ -626,8 +767,11 @@ ${scrapedContext ? `SCRAPED URL METADATA:\n${scrapedContext}\n` : ""}`;
             }
           };
         }
+        const assignedImage = shouldPopulateImages
+          ? extractedImages[(index - 1) % extractedImages.length] || ""
+          : "";
         return {
-          image: "",
+          image: assignedImage,
           title: step.title || `Stop ${index + 1}`,
           description: step.description || "",
           day: typeof step.day === "number" ? step.day : 1
@@ -644,7 +788,7 @@ ${scrapedContext ? `SCRAPED URL METADATA:\n${scrapedContext}\n` : ""}`;
   const finalTour: TourDocument = {
     title: parsed.title || "Untitled Tour Experience",
     duration: parsed.duration || "8-10 Hours",
-    gallery: [],
+    gallery: shouldPopulateImages ? extractedImages : [],
     infoSections: Array.isArray(parsed.infoSections)
       ? parsed.infoSections.map((sec: any) => ({
           title: sec.title ?? "",
@@ -661,7 +805,7 @@ ${scrapedContext ? `SCRAPED URL METADATA:\n${scrapedContext}\n` : ""}`;
     exclusions: Array.isArray(parsed.exclusions) ? parsed.exclusions : [],
     supplierId: safeDefaults.supplierId || "",
     transports: [],
-    featuredImage: "",
+    featuredImage: shouldPopulateImages ? extractedImages[0] || "" : "",
     labelIds: [safeDefaults.imageLabelId],
     cutOffHours:
       typeof parsed.cutOffHours === "number"
@@ -757,6 +901,7 @@ ${scrapedContext ? `SCRAPED URL METADATA:\n${scrapedContext}\n` : ""}`;
     tour: finalTour,
     meta: {
       detectedUrls,
+      extractedImages,
       groundingLinks: []
     }
   };

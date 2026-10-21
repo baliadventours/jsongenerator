@@ -113,6 +113,7 @@ export interface TenantDefaults {
   cutOffHours: number;
   primaryTransportId: string;
   packageTransportIds: string[];
+  includeSourceImages?: boolean;
 }
 
 export const DEFAULT_TENANT_CONFIG: TenantDefaults = {
@@ -137,7 +138,8 @@ export const DEFAULT_TENANT_CONFIG: TenantDefaults = {
     "zzzwN7Ua6wjps97LpjpQ",
     "JZqqdiIEXOyH1deMyXCv",
     "AUCf2PF7GdGDTzQZoo7u"
-  ]
+  ],
+  includeSourceImages: true
 };
 
 export const SAMPLE_MOUNT_BATUR_TOUR: TourDocument = {
