@@ -175,7 +175,16 @@ export default function App() {
         })
       });
 
-      const data = await response.json();
+      const rawText = await response.text();
+      let data: any;
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        throw new Error(
+          `Server returned non-JSON response (${response.status}): ${rawText.slice(0, 180)}`
+        );
+      }
+
       if (!response.ok || data.error) {
         throw new Error(data.error || `Extraction failed (${response.status})`);
       }
@@ -248,7 +257,15 @@ export default function App() {
             tenantDefaults
           })
         });
-        const data = await response.json();
+        const rawText = await response.text();
+        let data: any;
+        try {
+          data = JSON.parse(rawText);
+        } catch {
+          throw new Error(
+            `Server error (${response.status}): ${rawText.slice(0, 140)}`
+          );
+        }
         if (!response.ok || data.error) {
           throw new Error(data.error || "Extraction failed");
         }

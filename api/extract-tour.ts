@@ -1,26 +1,198 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import {
-  DEFAULT_TENANT_CONFIG,
-  SAMPLE_MOUNT_BATUR_TOUR,
-  TenantDefaults,
-  TourDocument,
-  normalizeToExactTourSchema
-} from "../src/types/tour";
+
+export interface FirestoreTimestamp {
+  type: "firestore/timestamp/1.0";
+  seconds: number;
+  nanoseconds: number;
+}
+
+export interface TourInfoSection {
+  content: string[];
+  title: string;
+}
+
+export interface TourAddOn {
+  unit: string;
+  description: string;
+  name: string;
+  price: number;
+  id: string;
+  tenantId: string;
+}
+
+export interface TourItineraryStep {
+  description: string;
+  day: number;
+  pickup?: {
+    description: string;
+  };
+  image?: string;
+  title: string;
+}
+
+export interface TourPackageTier {
+  childPrice: number;
+  maxParticipants: number;
+  minParticipants: number;
+  adultPrice: number;
+}
+
+export interface TourPackage {
+  exclusions: string[];
+  tiers: TourPackageTier[];
+  details: string;
+  inclusions: string[];
+  name: string;
+  transportIds: string[];
+  meetingPoint: string;
+  description: string;
+  pickupAreas: string;
+  meetingPointType: string;
+}
+
+export interface TourFaq {
+  question: string;
+  answer: string;
+}
+
+export interface TourDocument {
+  supplierId: string;
+  updatedAt: FirestoreTimestamp;
+  description: string;
+  tourTypeId: string;
+  transportIds: string[];
+  slug: string;
+  title: string;
+  languages: string[];
+  multiDayGuides: unknown[];
+  imageLabelId: string;
+  gallery: string[];
+  tenantId: string;
+  labelIds: string[];
+  location: string;
+  infoSections: TourInfoSection[];
+  addOnIds: string[];
+  createdAt: FirestoreTimestamp;
+  status: string;
+  transports: unknown[];
+  priceLabelId: string;
+  regularPrice: number;
+  cutOffHours: number;
+  importantInfo: string;
+  multiDayItinerary: unknown[];
+  highlights: string[];
+  duration: string;
+  locationId: string;
+  cutOffNotice: string;
+  tourDurationType: string;
+  addOns: TourAddOn[];
+  exclusions: string[];
+  slotCapacity: number;
+  discountPrice: number;
+  supplierName: string;
+  featuredImage: string;
+  belowTitleLabelId: string;
+  inclusions: string[];
+  categoryId: string;
+  itinerary: TourItineraryStep[];
+  meetingPoint: string;
+  faqs: TourFaq[];
+  accommodations: unknown[];
+  locationMapUrl: string;
+  packages: TourPackage[];
+  timeSlots: string[];
+  maxCapacity: number;
+}
+
+export interface TenantDefaults {
+  tenantId: string;
+  categoryId: string;
+  locationId: string;
+  imageLabelId: string;
+  supplierId: string;
+  supplierName: string;
+  status: string;
+  cutOffHours: number;
+  primaryTransportId: string;
+  packageTransportIds: string[];
+}
+
+const FALLBACK_TENANT_CONFIG: TenantDefaults = {
+  tenantId: "tenant_demo_msl5v6gx",
+  categoryId: "ea9bir7uAJwHcMrx6z3R",
+  locationId: "ERfC8Ko3SaLg95j5Pqee",
+  imageLabelId: "qkIW1OshbELFkG4LP2eW",
+  supplierId: "",
+  supplierName: "",
+  status: "published",
+  cutOffHours: 6,
+  primaryTransportId: "3kDrMDyGCdkZC6sT7UJy",
+  packageTransportIds: [
+    "3kDrMDyGCdkZC6sT7UJy",
+    "pZC33jBsTUFnkGM9ULmB",
+    "F8XZL69cJOwYnpGhBKJ2",
+    "NQzrxPd6Z9V62Hh0q8pj",
+    "2FPBnZUUAkawv61xrvpZ",
+    "53L8i2nW4jKULuEL2xkh",
+    "6sj3Zmc7Il5XizL9Qkv6",
+    "JcWE2aFc3dhKqNwGWPXj",
+    "zzzwN7Ua6wjps97LpjpQ",
+    "JZqqdiIEXOyH1deMyXCv",
+    "AUCf2PF7GdGDTzQZoo7u"
+  ]
+};
+
+const DEFAULT_GALLERY = [
+  "/api/uploads/dtB02xUT6sX8ku4JHH33",
+  "/api/uploads/UT29fKQZKh6sYb6zNejl",
+  "/api/uploads/d69p3fdP4yxp3SahvdGw",
+  "/api/uploads/FQRNDs8llr6LOi49CLO7",
+  "/api/uploads/ZGwpuAc3k1ej8Hc0Bzcq",
+  "/api/uploads/X5WGl62sY3nVKMzNMnQY"
+];
+
+const DEFAULT_ADDON_IDS = [
+  "6jBRtjCwQSmfS94SRfMg",
+  "J0BYE6VpWxtWXy5RKPF9",
+  "febIYN0KXRuQD2DveVQL"
+];
+
+const SAMPLE_ITINERARY_IMAGES = [
+  "/api/uploads/9btO7cYX7Xs6sfMLiaDr",
+  "/api/uploads/FQRNDs8llr6LOi49CLO7",
+  "/api/uploads/ZGwpuAc3k1ej8Hc0Bzcq",
+  "/api/uploads/XCCqJ3Nb54gxv7BkamCI",
+  "/api/uploads/STzGeQXFLLBSZaD6NK7d"
+];
 
 interface ScrapedUrlMetadata {
   originalUrl: string;
   resolvedUrl: string;
+  urlSlugHint: string;
   pageTitle: string;
   metaDescription: string;
   ldJsonBlocks: string[];
   bodyExcerpt: string;
-  fetchWarning?: string;
+}
+
+function extractSlugHintFromUrl(urlStr: string): string {
+  try {
+    const u = new URL(urlStr);
+    const segments = u.pathname
+      .split("/")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    return segments.join(" / ").replace(/-/g, " ");
+  } catch {
+    return urlStr;
+  }
 }
 
 async function inspectUrlContent(rawUrl: string): Promise<ScrapedUrlMetadata> {
   const result: ScrapedUrlMetadata = {
     originalUrl: rawUrl,
     resolvedUrl: rawUrl,
+    urlSlugHint: extractSlugHintFromUrl(rawUrl),
     pageTitle: "",
     metaDescription: "",
     ldJsonBlocks: [],
@@ -29,7 +201,7 @@ async function inspectUrlContent(rawUrl: string): Promise<ScrapedUrlMetadata> {
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 7500);
+    const timeout = setTimeout(() => controller.abort(), 2500);
 
     const response = await fetch(rawUrl, {
       method: "GET",
@@ -48,6 +220,7 @@ async function inspectUrlContent(rawUrl: string): Promise<ScrapedUrlMetadata> {
 
     if (response.url) {
       result.resolvedUrl = response.url;
+      result.urlSlugHint = extractSlugHintFromUrl(response.url);
     }
 
     const html = await response.text();
@@ -75,8 +248,8 @@ async function inspectUrlContent(rawUrl: string): Promise<ScrapedUrlMetadata> {
     for (const match of ldMatches) {
       if (match[1]) {
         const cleaned = match[1].trim();
-        if (cleaned.length > 10 && result.ldJsonBlocks.length < 4) {
-          result.ldJsonBlocks.push(cleaned.slice(0, 5000));
+        if (cleaned.length > 10 && result.ldJsonBlocks.length < 3) {
+          result.ldJsonBlocks.push(cleaned.slice(0, 3500));
         }
       }
     }
@@ -88,10 +261,9 @@ async function inspectUrlContent(rawUrl: string): Promise<ScrapedUrlMetadata> {
       .replace(/\s+/g, " ")
       .trim();
 
-    result.bodyExcerpt = strippedText.slice(0, 7000);
-  } catch (err) {
-    result.fetchWarning =
-      err instanceof Error ? err.message : "Direct HTTP fetch skipped";
+    result.bodyExcerpt = strippedText.slice(0, 4500);
+  } catch {
+    // Direct scrape timed out or blocked by Cloudflare; URL slug & Gemini knowledge will be used
   }
 
   return result;
@@ -103,12 +275,12 @@ const TOUR_EXTRACTION_SCHEMA = {
     title: {
       type: Type.STRING,
       description:
-        "Compelling, clean tour title (e.g., 'Mount Agung Sunrise Trekking Private Experience')"
+        "Compelling, clean tour title (e.g., 'Mount Batur Jeep 4x4 Sunrise & Black Lava Private Tour')"
     },
     slug: {
       type: Type.STRING,
       description:
-        "Kebab-case URL slug ending with a 4-digit code (e.g., 'bali-mount-agung-sunrise-trekking-experience-3925')"
+        "Kebab-case URL slug ending with a 4-digit code (e.g., 'bali-mount-batur-sunrise-jeep-black-lava-with-hot-springs-1486')"
     },
     description: {
       type: Type.STRING,
@@ -118,11 +290,11 @@ const TOUR_EXTRACTION_SCHEMA = {
     location: {
       type: Type.STRING,
       description:
-        "Primary region or city name (e.g., 'Karangasem', 'Ubud', 'Kintamani', 'Nusa Penida')"
+        "Primary region or city name (e.g., 'Kintamani', 'Ubud', 'Karangasem', 'Nusa Penida')"
     },
     duration: {
       type: Type.STRING,
-      description: "Duration range (e.g., '6-8 Hours', '10-12 Hours')"
+      description: "Duration range (e.g., '6-8 Hours', '8-10 Hours')"
     },
     tourDurationType: {
       type: Type.STRING,
@@ -134,11 +306,11 @@ const TOUR_EXTRACTION_SCHEMA = {
     },
     discountPrice: {
       type: Type.NUMBER,
-      description: "Starting lowest tier price in USD (e.g., 19 or 45)"
+      description: "Starting lowest tier price in USD (e.g., 19 or 35)"
     },
     cutOffHours: {
       type: Type.NUMBER,
-      description: "Booking cut-off hours before start (e.g., 6 or 12)"
+      description: "Booking cut-off hours before start (e.g., 6)"
     },
     importantInfo: {
       type: Type.STRING,
@@ -151,11 +323,11 @@ const TOUR_EXTRACTION_SCHEMA = {
     },
     latitude: {
       type: Type.NUMBER,
-      description: "Approximate latitude of the destination (e.g., -8.3433)"
+      description: "Approximate latitude of the destination (e.g., -8.2303556)"
     },
     longitude: {
       type: Type.NUMBER,
-      description: "Approximate longitude of the destination (e.g., 115.5071)"
+      description: "Approximate longitude of the destination (e.g., 115.3877491)"
     },
     highlights: {
       type: Type.ARRAY,
@@ -178,7 +350,7 @@ const TOUR_EXTRACTION_SCHEMA = {
       type: Type.ARRAY,
       items: { type: Type.STRING },
       description:
-        "Array of 24-hour departure times in HH:MM format (e.g., ['03:00', '03:30', '04:00'] or ['07:30', '08:00', '08:30'])"
+        "Array of 24-hour departure times in HH:MM format (e.g., ['03:00', '03:30', '04:00'])"
     },
     infoSections: {
       type: Type.ARRAY,
@@ -199,7 +371,7 @@ const TOUR_EXTRACTION_SCHEMA = {
     itinerary: {
       type: Type.ARRAY,
       description:
-        "5 to 6 chronological itinerary stops starting with 'Pick up from the hotel' and ending with 'Back to hotel'",
+        "6 chronological itinerary stops starting with 'Pick up from the hotel' and ending with 'Back to hotel'",
       items: {
         type: Type.OBJECT,
         properties: {
@@ -209,7 +381,7 @@ const TOUR_EXTRACTION_SCHEMA = {
           pickupDescription: {
             type: Type.STRING,
             description:
-              "Only for the first stop, e.g., 'Pick up from your hotel at 08:00' or 'Pick up from your hotel at 23:00'"
+              "Only for the first stop, e.g., 'Pick up from your hotel at 03:00'"
           }
         },
         required: ["day", "title", "description"]
@@ -270,7 +442,7 @@ const TOUR_EXTRACTION_SCHEMA = {
     },
     addOns: {
       type: Type.ARRAY,
-      description: "Optional add-ons like Lunch, Breakfast, Photographer",
+      description: "3 optional add-ons (Lunch, Breakfast, Photographer)",
       items: {
         type: Type.OBJECT,
         properties: {
@@ -280,17 +452,6 @@ const TOUR_EXTRACTION_SCHEMA = {
           description: { type: Type.STRING }
         },
         required: ["name", "price", "unit", "description"]
-      }
-    },
-    faqs: {
-      type: Type.ARRAY,
-      items: {
-        type: Type.OBJECT,
-        properties: {
-          question: { type: Type.STRING },
-          answer: { type: Type.STRING }
-        },
-        required: ["question", "answer"]
       }
     }
   },
@@ -335,14 +496,54 @@ function buildOpenStreetMapEmbedUrl(lat: number, lng: number): string {
   return `https://www.openstreetmap.org/export/embed.html?bbox=${minLng},${minLat},${maxLng},${maxLat}&layer=mapnik&marker=${safeLat.toFixed(7)},${safeLng.toFixed(7)}`;
 }
 
+async function generateStructuredTourWithFallback(
+  ai: GoogleGenAI,
+  prompt: string
+) {
+  const candidateModels = ["gemini-3.8-flash", "gemini-flash-latest"];
+  let lastError: unknown = null;
+
+  for (const modelName of candidateModels) {
+    try {
+      const response = await ai.models.generateContent({
+        model: modelName,
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: TOUR_EXTRACTION_SCHEMA,
+          temperature: 0.3
+        }
+      });
+      if (response.text) {
+        return response.text;
+      }
+    } catch (err: any) {
+      lastError = err;
+      const msg = String(err?.message || "");
+      // If model is not found on external deployment, try next model alias
+      if (
+        msg.includes("404") ||
+        msg.includes("NOT_FOUND") ||
+        msg.includes("not found") ||
+        msg.includes("not supported")
+      ) {
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  throw lastError || new Error("Failed to generate structured tour JSON.");
+}
+
 export async function processTourExtraction(
   input: string,
-  tenantDefaults: TenantDefaults = DEFAULT_TENANT_CONFIG
+  tenantDefaults: TenantDefaults = FALLBACK_TENANT_CONFIG
 ) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error(
-      "GEMINI_API_KEY environment variable is not configured on the server. Add GEMINI_API_KEY in your environment settings."
+      "GEMINI_API_KEY is missing. On Vercel, add GEMINI_API_KEY under Project Settings -> Environment Variables and redeploy."
     );
   }
 
@@ -360,8 +561,6 @@ export async function processTourExtraction(
   const detectedUrls = trimmedInput.match(urlRegex) || [];
 
   let scrapedContext = "";
-  let groundingSummary = "";
-  const groundingLinks: { uri: string; title: string }[] = [];
 
   if (detectedUrls.length > 0) {
     const primaryUrl = detectedUrls[0] ?? trimmedInput;
@@ -370,6 +569,7 @@ export async function processTourExtraction(
     scrapedContext = [
       `Original URL: ${scraped.originalUrl}`,
       `Resolved URL: ${scraped.resolvedUrl}`,
+      `URL Path / Tour Keywords: ${scraped.urlSlugHint}`,
       scraped.pageTitle ? `Page Title: ${scraped.pageTitle}` : "",
       scraped.metaDescription
         ? `Meta Description: ${scraped.metaDescription}`
@@ -381,62 +581,23 @@ export async function processTourExtraction(
     ]
       .filter(Boolean)
       .join("\n\n");
-
-    try {
-      const researchResponse = await ai.models.generateContent({
-        model: "gemini-3.8-flash",
-        contents: `Extract comprehensive tour details for this OTA tour listing URL or query:
-URL: ${scraped.resolvedUrl} (Original: ${scraped.originalUrl})
-User Input: ${trimmedInput}
-${scraped.pageTitle ? `Detected Title: ${scraped.pageTitle}` : ""}
-
-Provide all factual details about this specific tour:
-1. Full Tour Title and Location/Region
-2. Duration and Departure Time Slots
-3. Complete step-by-step Itinerary from pickup to drop-off
-4. Key Highlights (5+ items)
-5. What is Included and Excluded
-6. Package options / pricing tiers (Solo, 2-3 pax, 4-5 pax, 6-10 pax) in USD
-7. Important info (what to bring, physical requirements, cancellation policy)
-8. Meeting point and approximate GPS coordinates (latitude, longitude)`,
-        config: {
-          tools: [{ urlContext: {} }, { googleSearch: {} }]
-        }
-      });
-
-      groundingSummary = researchResponse.text || "";
-      const chunks =
-        researchResponse.candidates?.[0]?.groundingMetadata?.groundingChunks;
-      if (Array.isArray(chunks)) {
-        for (const c of chunks) {
-          if (c.web?.uri) {
-            groundingLinks.push({
-              uri: c.web.uri,
-              title: c.web.title || c.web.uri
-            });
-          }
-        }
-      }
-    } catch (groundingErr) {
-      console.warn("Grounding enrichment warning:", groundingErr);
-    }
   }
 
   const extractionPrompt = `You are a specialist OTA Tour Data Architect. Convert the provided OTA URL data and/or user prompt into a complete, rich Tour JSON object that follows our exact Firestore tour schema.
 
 REFERENCE STYLE & STRUCTURE RULES:
 1. Tone & Copy: Write warm, evocative, sensory-rich travel copy ("Escape the usual tourist tracks...", detailed step-by-step itinerary descriptions, clear package descriptions).
-2. Slug: Lowercase kebab-case ending with a 4-digit number (e.g. "bali-mount-agung-sunrise-trekking-experience-3925"). If the URL has a tour ID number (like t392586 -> 3925), use 4 digits from it.
+2. Slug: Lowercase kebab-case ending with a 4-digit number (e.g. "bali-mount-batur-sunrise-jeep-black-lava-with-hot-springs-1486"). If the URL has a tour ID number (like t1486033 -> 1486, or t392586 -> 3925), use 4 digits from it.
 3. InfoSections: Must have 3 sections in this exact pattern:
    - Section 1 title: " Before You Book" (note leading space, 6-8 bullet items covering minimum booking, English speaking driver, health restrictions, private/group info)
    - Section 2 title: "" (empty string title, 2 bullet items covering what to wear/bring and temperature/shoes)
    - Section 3 title: "Other Think You Have To Know" (5 bullet items covering 24h cancellation refund, weather policy, 30% deposit via bank transfer/Wise/Remitly, balance in USD/IDR cash on arrival, travel insurance)
 4. Inclusions & Exclusions: End both arrays with the exact string: "Check out package details for inclusion and exclusion!"
-5. Itinerary: 5 to 6 chronological steps on day 1.
-   - Step 1 MUST be titled "Pick up from the hotel" with a pickupDescription (e.g. "Pick up from your hotel at 08:00" or appropriate start time).
+5. Itinerary: 6 chronological steps on day 1.
+   - Step 1 MUST be titled "Pick up from the hotel" with a pickupDescription (e.g. "Pick up from your hotel at 03:00" or appropriate start time).
    - Middle steps cover the core experience stops with vivid 2-3 sentence descriptions.
    - Final step MUST be titled "Back to hotel".
-6. Packages: Generate 3 distinct packages ("Easy Package", "Comfy Package", "Exclusive Package") or adapt the OTA's actual packages into 3 tiers, each with 4 participant pricing tiers:
+6. Packages: Generate 3 distinct packages ("Easy Package", "Comfy Package", "Exclusive Package"), each with 4 participant pricing tiers:
    - Tier 1: minParticipants: 1, maxParticipants: 1
    - Tier 2: minParticipants: 2, maxParticipants: 3
    - Tier 3: minParticipants: 4, maxParticipants: 5
@@ -445,36 +606,28 @@ REFERENCE STYLE & STRUCTURE RULES:
 SOURCE INPUT FROM USER:
 ${trimmedInput}
 
-${scrapedContext ? `SCRAPED URL METADATA:\n${scrapedContext}\n` : ""}
-${groundingSummary ? `GROUNDED RESEARCH DATA:\n${groundingSummary}\n` : ""}`;
+${scrapedContext ? `SCRAPED URL METADATA:\n${scrapedContext}\n` : ""}`;
 
-  const structuredResponse = await ai.models.generateContent({
-    model: "gemini-3.8-flash",
-    contents: extractionPrompt,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: TOUR_EXTRACTION_SCHEMA,
-      temperature: 0.3
-    }
-  });
+  const rawJsonText = await generateStructuredTourWithFallback(
+    ai,
+    extractionPrompt
+  );
+  const parsed = JSON.parse(rawJsonText.trim() || "{}");
 
-  const rawJsonText = structuredResponse.text?.trim() || "{}";
-  const parsed = JSON.parse(rawJsonText);
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  const safeDefaults: TenantDefaults = {
+    ...FALLBACK_TENANT_CONFIG,
+    ...(tenantDefaults || {})
+  };
 
-  const sampleItineraryImages = [
-    "/api/uploads/9btO7cYX7Xs6sfMLiaDr",
-    "/api/uploads/FQRNDs8llr6LOi49CLO7",
-    "/api/uploads/ZGwpuAc3k1ej8Hc0Bzcq",
-    "/api/uploads/XCCqJ3Nb54gxv7BkamCI",
-    "/api/uploads/STzGeQXFLLBSZaD6NK7d"
-  ];
-
-  const formattedItinerary = Array.isArray(parsed.itinerary)
+  const formattedItinerary: TourItineraryStep[] = Array.isArray(
+    parsed.itinerary
+  )
     ? parsed.itinerary.map((step: any, index: number) => {
         if (index === 0) {
           return {
             description: step.description || "",
-            day: step.day || 1,
+            day: typeof step.day === "number" ? step.day : 1,
             pickup: {
               description:
                 step.pickupDescription ||
@@ -486,67 +639,159 @@ ${groundingSummary ? `GROUNDED RESEARCH DATA:\n${groundingSummary}\n` : ""}`;
         return {
           description: step.description || "",
           image:
-            sampleItineraryImages[(index - 1) % sampleItineraryImages.length],
-          day: step.day || 1,
-          title: step.title || `Experience Stop ${index}`
+            SAMPLE_ITINERARY_IMAGES[
+              (index - 1) % SAMPLE_ITINERARY_IMAGES.length
+            ],
+          day: typeof step.day === "number" ? step.day : 1,
+          title: step.title || `Stop ${index + 1}`
         };
       })
-    : SAMPLE_MOUNT_BATUR_TOUR.itinerary;
+    : [];
 
-  const formattedAddOns =
+  const formattedAddOns: TourAddOn[] =
     Array.isArray(parsed.addOns) && parsed.addOns.length > 0
       ? parsed.addOns.map((addon: any, idx: number) => ({
           unit: addon.unit || "per person",
           description: addon.description ?? "",
           name: addon.name || `Add-On ${idx + 1}`,
           price: typeof addon.price === "number" ? addon.price : 20,
-          id:
-            SAMPLE_MOUNT_BATUR_TOUR.addOnIds[idx] ||
-            `addon_${Math.random().toString(36).slice(2, 10)}`,
-          tenantId: tenantDefaults.tenantId
+          id: DEFAULT_ADDON_IDS[idx] || `addon_${idx + 1}`,
+          tenantId: safeDefaults.tenantId
         }))
-      : SAMPLE_MOUNT_BATUR_TOUR.addOns.map((a) => ({
-          ...a,
-          tenantId: tenantDefaults.tenantId
-        }));
+      : [
+          {
+            unit: "per person",
+            description: "",
+            name: "Lunch",
+            price: 20,
+            id: "6jBRtjCwQSmfS94SRfMg",
+            tenantId: safeDefaults.tenantId
+          },
+          {
+            tenantId: safeDefaults.tenantId,
+            price: 20,
+            unit: "per person",
+            id: "J0BYE6VpWxtWXy5RKPF9",
+            description: "",
+            name: "Breakfast"
+          },
+          {
+            description: "",
+            tenantId: safeDefaults.tenantId,
+            id: "febIYN0KXRuQD2DveVQL",
+            unit: "per booking",
+            price: 100,
+            name: "Photographer"
+          }
+        ];
 
   const locationMapUrl = buildOpenStreetMapEmbedUrl(
     parsed.latitude,
     parsed.longitude
   );
 
-  const finalTour: TourDocument = normalizeToExactTourSchema(
-    {
-      title: parsed.title,
-      slug: parsed.slug,
-      description: parsed.description,
-      location: parsed.location,
-      duration: parsed.duration,
-      tourDurationType: parsed.tourDurationType,
-      regularPrice: parsed.regularPrice,
-      discountPrice: parsed.discountPrice,
-      cutOffHours: parsed.cutOffHours,
-      importantInfo: parsed.importantInfo,
-      meetingPoint: parsed.meetingPoint,
-      locationMapUrl,
-      highlights: parsed.highlights,
-      inclusions: parsed.inclusions,
-      exclusions: parsed.exclusions,
-      timeSlots: parsed.timeSlots,
-      infoSections: parsed.infoSections,
-      itinerary: formattedItinerary,
-      packages: parsed.packages,
-      addOns: formattedAddOns,
-      faqs: parsed.faqs || []
+  const finalTour: TourDocument = {
+    supplierId: safeDefaults.supplierId || "",
+    updatedAt: {
+      type: "firestore/timestamp/1.0",
+      seconds: nowSeconds,
+      nanoseconds: 192000000
     },
-    tenantDefaults
-  );
+    description: parsed.description || "",
+    tourTypeId: "",
+    transportIds: [safeDefaults.primaryTransportId],
+    slug:
+      parsed.slug ||
+      `${(parsed.title || "bali-private-tour")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "")}-1839`,
+    title: parsed.title || "Untitled Tour Experience",
+    languages: [],
+    multiDayGuides: [],
+    imageLabelId: safeDefaults.imageLabelId,
+    gallery: DEFAULT_GALLERY,
+    tenantId: safeDefaults.tenantId,
+    labelIds: [safeDefaults.imageLabelId],
+    location: parsed.location || "Bali",
+    infoSections: Array.isArray(parsed.infoSections)
+      ? parsed.infoSections.map((sec: any) => ({
+          content: Array.isArray(sec.content) ? sec.content : [],
+          title: sec.title ?? ""
+        }))
+      : [],
+    addOnIds: DEFAULT_ADDON_IDS,
+    createdAt: {
+      type: "firestore/timestamp/1.0",
+      seconds: nowSeconds - 3600,
+      nanoseconds: 562000000
+    },
+    status: safeDefaults.status || "published",
+    transports: [],
+    priceLabelId: "",
+    regularPrice:
+      typeof parsed.regularPrice === "number" ? parsed.regularPrice : 100,
+    cutOffHours:
+      typeof parsed.cutOffHours === "number"
+        ? parsed.cutOffHours
+        : safeDefaults.cutOffHours,
+    importantInfo: parsed.importantInfo || "",
+    multiDayItinerary: [],
+    highlights: Array.isArray(parsed.highlights) ? parsed.highlights : [],
+    duration: parsed.duration || "6-8 Hours",
+    locationId: safeDefaults.locationId,
+    cutOffNotice: "",
+    tourDurationType: parsed.tourDurationType || "single_day",
+    addOns: formattedAddOns,
+    exclusions: Array.isArray(parsed.exclusions) ? parsed.exclusions : [],
+    slotCapacity: 0,
+    discountPrice:
+      typeof parsed.discountPrice === "number" ? parsed.discountPrice : 19,
+    supplierName: safeDefaults.supplierName || "",
+    featuredImage: "/api/uploads/FQRNDs8llr6LOi49CLO7",
+    belowTitleLabelId: "",
+    inclusions: Array.isArray(parsed.inclusions) ? parsed.inclusions : [],
+    categoryId: safeDefaults.categoryId,
+    itinerary: formattedItinerary,
+    meetingPoint: parsed.meetingPoint || "Your Hotel",
+    faqs: [],
+    accommodations: [],
+    locationMapUrl,
+    packages: Array.isArray(parsed.packages)
+      ? parsed.packages.map((pkg: any, idx: number) => ({
+          exclusions: Array.isArray(pkg.exclusions) ? pkg.exclusions : [],
+          tiers: Array.isArray(pkg.tiers)
+            ? pkg.tiers.map((t: any) => ({
+                childPrice: Number(t.childPrice ?? 19),
+                maxParticipants: Number(t.maxParticipants ?? 1),
+                minParticipants: Number(t.minParticipants ?? 1),
+                adultPrice: Number(t.adultPrice ?? 50)
+              }))
+            : [],
+          details: pkg.details || pkg.description || "",
+          inclusions: Array.isArray(pkg.inclusions) ? pkg.inclusions : [],
+          name: pkg.name || `Package ${idx + 1}`,
+          transportIds: safeDefaults.packageTransportIds,
+          meetingPoint:
+            pkg.meetingPoint ||
+            "Toya Devasya\nhttps://maps.app.goo.gl/uU8hcZVc417nfjUp9",
+          description: pkg.description || pkg.details || "",
+          pickupAreas:
+            pkg.pickupAreas || "Most area are covered for pick up and drop off",
+          meetingPointType: pkg.meetingPointType || "Meeting Point"
+        }))
+      : [],
+    timeSlots: Array.isArray(parsed.timeSlots)
+      ? parsed.timeSlots
+      : ["03:00", "03:30", "04:00"],
+    maxCapacity: 0
+  };
 
   return {
     tour: finalTour,
     meta: {
       detectedUrls,
-      groundingLinks
+      groundingLinks: []
     }
   };
 }
@@ -561,7 +806,7 @@ export default async function handler(req: any, res: any) {
   try {
     const body =
       typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
-    const { input, tenantDefaults = DEFAULT_TENANT_CONFIG } = body;
+    const { input, tenantDefaults = FALLBACK_TENANT_CONFIG } = body;
 
     if (!input || !String(input).trim()) {
       res.status(400).json({
@@ -575,7 +820,12 @@ export default async function handler(req: any, res: any) {
     res.status(200).json(result);
   } catch (error: any) {
     console.error("Error in /api/extract-tour:", error);
-    const status = error?.status || 500;
+    const status =
+      typeof error?.status === "number" &&
+      error.status >= 400 &&
+      error.status < 600
+        ? error.status
+        : 500;
     const message =
       error instanceof Error
         ? error.message
