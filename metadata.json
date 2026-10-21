@@ -1,0 +1,6 @@
+{
+  "name": "TourJSON Studio",
+  "description": "OTA URL and prompt-to-JSON extraction studio for Viator, GetYourGuide, and Klook tour listings.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
