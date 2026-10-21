@@ -5,8 +5,8 @@ export interface FirestoreTimestamp {
 }
 
 export interface TourInfoSection {
-  content: string[];
   title: string;
+  content: string[];
 }
 
 export interface TourAddOn {
@@ -20,32 +20,32 @@ export interface TourAddOn {
 
 export interface TourItineraryStep {
   description: string;
+  title: string;
   day: number;
   pickup?: {
     description: string;
   };
   image?: string;
-  title: string;
 }
 
 export interface TourPackageTier {
   childPrice: number;
+  adultPrice: number;
   maxParticipants: number;
   minParticipants: number;
-  adultPrice: number;
 }
 
 export interface TourPackage {
-  exclusions: string[];
-  tiers: TourPackageTier[];
-  details: string;
-  inclusions: string[];
-  name: string;
-  transportIds: string[];
   meetingPoint: string;
-  description: string;
+  exclusions: string[];
+  transportIds: string[];
+  name: string;
   pickupAreas: string;
   meetingPointType: string;
+  tiers: TourPackageTier[];
+  details: string;
+  description: string;
+  inclusions: string[];
 }
 
 export interface TourFaq {
@@ -54,52 +54,52 @@ export interface TourFaq {
 }
 
 export interface TourDocument {
-  supplierId: string;
-  updatedAt: FirestoreTimestamp;
-  description: string;
-  tourTypeId: string;
-  transportIds: string[];
-  slug: string;
   title: string;
-  languages: string[];
-  multiDayGuides: unknown[];
-  imageLabelId: string;
-  gallery: string[];
-  tenantId: string;
-  labelIds: string[];
-  location: string;
-  infoSections: TourInfoSection[];
-  addOnIds: string[];
-  createdAt: FirestoreTimestamp;
-  status: string;
-  transports: unknown[];
-  priceLabelId: string;
-  regularPrice: number;
-  cutOffHours: number;
-  importantInfo: string;
-  multiDayItinerary: unknown[];
-  highlights: string[];
   duration: string;
-  locationId: string;
-  cutOffNotice: string;
-  tourDurationType: string;
-  addOns: TourAddOn[];
-  exclusions: string[];
-  slotCapacity: number;
-  discountPrice: number;
+  gallery: string[];
+  infoSections: TourInfoSection[];
+  description: string;
+  imageLabelId: string;
+  highlights: string[];
+  priceLabelId: string;
   supplierName: string;
+  status: string;
+  multiDayGuides: unknown[];
+  exclusions: string[];
+  supplierId: string;
+  transports: unknown[];
   featuredImage: string;
-  belowTitleLabelId: string;
-  inclusions: string[];
-  categoryId: string;
-  itinerary: TourItineraryStep[];
-  meetingPoint: string;
+  labelIds: string[];
+  cutOffHours: number;
+  regularPrice: number;
+  languages: string[];
+  discountPrice: number;
+  addOnIds: string[];
   faqs: TourFaq[];
-  accommodations: unknown[];
-  locationMapUrl: string;
-  packages: TourPackage[];
+  tourTypeId: string;
+  itinerary: TourItineraryStep[];
+  createdAt: FirestoreTimestamp;
+  belowTitleLabelId: string;
+  slug: string;
   timeSlots: string[];
+  cutOffNotice: string;
+  multiDayItinerary: unknown[];
+  transportIds: string[];
+  tourDurationType: string;
+  accommodations: unknown[];
   maxCapacity: number;
+  updatedAt: FirestoreTimestamp;
+  location: string;
+  categoryId: string;
+  locationMapUrl: string;
+  tenantId: string;
+  meetingPoint: string;
+  importantInfo: string;
+  addOns: TourAddOn[];
+  packages: TourPackage[];
+  inclusions: string[];
+  slotCapacity: number;
+  locationId: string;
 }
 
 export interface TenantDefaults {
@@ -116,7 +116,7 @@ export interface TenantDefaults {
 }
 
 export const DEFAULT_TENANT_CONFIG: TenantDefaults = {
-  tenantId: "tenant_demo_msl5v6gx",
+  tenantId: "tenant_explorebalitours_mv3ucul5",
   categoryId: "ea9bir7uAJwHcMrx6z3R",
   locationId: "ERfC8Ko3SaLg95j5Pqee",
   imageLabelId: "qkIW1OshbELFkG4LP2eW",
@@ -141,360 +141,228 @@ export const DEFAULT_TENANT_CONFIG: TenantDefaults = {
 };
 
 export const SAMPLE_MOUNT_BATUR_TOUR: TourDocument = {
-  supplierId: "",
-  updatedAt: {
-    type: "firestore/timestamp/1.0",
-    seconds: 1792340987,
-    nanoseconds: 192000000
-  },
-  description:
-    "Escape the usual tourist tracks and come wander with us through the beating heart of Bali. We will take you deep into Ubud's emerald valleys, where the air smells of wild ginger and fresh morning dew. You will feel the cool mist of a secluded waterfall on your skin, walk the ancient stone paths of sacred water temples, and look out over rice terraces that look like giant green steps climbing to the heavens. This isn't just a sightseeing trip; it is an invitation to slow down, breathe deeply, and connect with the gentle soul of our island. Let us show you the Bali we know and love.",
-  tourTypeId: "",
-  transportIds: ["3kDrMDyGCdkZC6sT7UJy"],
-  slug: "mount-batur-sunrise-gold-black-lava-4x4-jeep-adventure-1839",
-  title: "Mount Batur Jeep 4x4 Sunrise Private Tour",
-  languages: [],
-  multiDayGuides: [],
-  imageLabelId: "qkIW1OshbELFkG4LP2eW",
-  gallery: [
-    "/api/uploads/dtB02xUT6sX8ku4JHH33",
-    "/api/uploads/UT29fKQZKh6sYb6zNejl",
-    "/api/uploads/d69p3fdP4yxp3SahvdGw",
-    "/api/uploads/FQRNDs8llr6LOi49CLO7",
-    "/api/uploads/ZGwpuAc3k1ej8Hc0Bzcq",
-    "/api/uploads/X5WGl62sY3nVKMzNMnQY"
-  ],
-  tenantId: "tenant_demo_msl5v6gx",
-  labelIds: ["qkIW1OshbELFkG4LP2eW"],
-  location: "Ubud",
+  title: "Mount Batur Sunrise 4WD Jeep, Black Lava & Natural Hot Spring Tour",
+  duration: "8-10 Hours",
+  gallery: [],
   infoSections: [
     {
+      title: " Before You Book",
       content: [
-        "Minimum booking: 2 person",
-        "The tour will assist by English speaking Bali driver",
-        "Not recommended for travelers with back problems",
-        "Not recommended for pregnant travelers",
-        "Most travelers can participate",
-        "Not wheelchair accessible",
-        "Itineraries are subject to change due to external factors such as weather conditions, traffic conditions, and other unpredictable circumstances.",
-        "This is a private tour/activity. Only your group will participate"
-      ],
-      title: " Before You Book"
-    },
-    {
-      title: "",
-      content: [
-        "Please bring a warm jacket or sweater, as temperatures on the mountain can drop significantly before sunrise (around 14-18 degrees Celsius). ",
-        "Wear comfortable closed-toe shoes and don't forget your camera!"
+        "Minimum booking of 1 participant is required to confirm the reservation.",
+        "Private hotel pick-up and drop-off is included across major tourist areas including Kuta, Seminyak, Legian, Canggu, Sanur, Ubud, Nusa Dua, and Jimbaran.",
+        "Your English-speaking private driver will greet you directly in your hotel lobby holding a personalized name sign.",
+        "This excursion involves an off-road 4WD ride; it is not recommended for pregnant women or travelers with severe back conditions.",
+        "Mount Batur elevation is around 1,365 meters above sea level, where predawn temperatures can fall between 10°C to 15°C (50°F - 59°F).",
+        "Child seats are available upon advance request at no additional charge."
       ]
     },
     {
       content: [
-        "For a full refund, you must cancel at least 24 hours before the experience’s start time.",
-        "Tour May be cancel due to extreme weather condition with full refund",
-        "Deposit 30% is required to secure the booking. Deposit payment can be done by bank transfer, Remitly, Wise and Western union.",
-        "The rest you can pay upon arrival in Bali by cash USD or IDR . Or the remainder can be paid by online transfer no later than 7 days before arrival",
-        "Travel insurance is highly recommended for all participants ."
+        "What to bring: Warm fleece or jacket, comfortable long pants, closed-toe walking shoes, swimwear, clean change of clothes, camera or smartphone, and extra cash for personal expenses.",
+        "Weather notice: Mountain weather in Kintamani can change quickly; while sunrise views are typical, cloud coverage and atmospheric conditions are governed by nature."
       ],
-      title: "Other Think You Have To Know"
+      title: ""
+    },
+    {
+      title: "Other Think You Have To Know",
+      content: [
+        "Enjoy full flexibility with a 100% refund for cancellations submitted at least 24 hours prior to scheduled pick-up time.",
+        "In the event of severe inclement weather posing safety risks, alternative tour arrangements or complete refunds will be provided.",
+        "A 30% deposit is secured via bank transfer, Wise, or Remitly at the time of reservation to confirm your private 4x4 Jeep.",
+        "The remaining balance may be settled conveniently in USD or IDR cash upon pick-up with your driver.",
+        "Comprehensive travel accident insurance is included for all registered participants throughout the duration of the tour."
+      ]
     }
   ],
+  description:
+    "Escape the predawn chill and venture up the rugged volcanic slopes of Mount Batur aboard an authentic open-roof 4WD classic Jeep. Watch the world slowly awaken as brilliant hues of amber, violet, and gold illuminate the sacred caldera, Lake Batur, and distant Mount Rinjani. Afterward, traverse the stark and dramatic expanse of ancient black lava flows formed by historic volcanic eruptions. Conclude your mountain adventure with a deeply soothing soak in natural lakeside hot springs, letting the thermal mineral waters rejuvenate your body and spirit. Complete your journey with an aromatic tasting flight of artisanal coffees and teas nestled within lush jungle scenery.",
+  imageLabelId: "qkIW1OshbELFkG4LP2eW",
+  highlights: [
+    "Witness an unforgettable golden sunrise over Mount Batur from an exclusive high-altitude viewpoint without strenuous hiking",
+    "Ride across rugged mountain terrains in an iconic open-top 4WD vintage Jeep guided by an expert local driver",
+    "Explore the dramatic volcanic landscape and otherworldly rock fields of the historic 1963 Black Lava flow",
+    "Melt your stress away in natural thermal hot spring pools situated right at the edge of Lake Batur",
+    "Savor complimentary hot drinks and breakfast at dawn, followed by a visit to a traditional organic spice plantation"
+  ],
+  priceLabelId: "",
+  supplierName: "",
+  status: "published",
+  multiDayGuides: [],
+  exclusions: [
+    "Personal expenses, souvenirs, and additional snacks or alcoholic beverages",
+    "Tipping and gratuities for your driver and local Jeep guide",
+    "Luwak coffee tasting fee (available for optional upgrade on-site)",
+    "Check out package details for inclusion and exclusion!"
+  ],
+  supplierId: "",
+  transports: [],
+  featuredImage: "",
+  labelIds: ["qkIW1OshbELFkG4LP2eW"],
+  cutOffHours: 6,
+  regularPrice: 85,
+  languages: [],
+  discountPrice: 32,
   addOnIds: [
     "6jBRtjCwQSmfS94SRfMg",
     "J0BYE6VpWxtWXy5RKPF9",
     "febIYN0KXRuQD2DveVQL"
   ],
-  createdAt: {
-    type: "firestore/timestamp/1.0",
-    seconds: 1786241437,
-    nanoseconds: 562000000
-  },
-  status: "published",
-  transports: [],
-  priceLabelId: "",
-  regularPrice: 100,
-  cutOffHours: 6,
-  importantInfo:
-    "Please wear comfortable walking shoes suitable for wet stairs. Bring a swimsuit and a change of clothes if you wish to bathe at the waterfall or participate in the holy spring ritual.",
-  multiDayItinerary: [],
-  highlights: [
-    "Stand in awe before the hidden, jungle-framed Tibumana Waterfall",
-    "Participate in or witness a traditional purification ritual at Tirta Empul",
-    "Wander through the iconic, undulating green slopes of Tegallalang Rice Terraces",
-    "Savor an authentic Balinese lunch overlooking the breathtaking jungle ravines",
-    "Enjoy the comfort of your own private luxury vehicle and local storyteller guide"
-  ],
-  duration: "6-8 Hours",
-  locationId: "ERfC8Ko3SaLg95j5Pqee",
-  cutOffNotice: "",
-  tourDurationType: "single_day",
-  addOns: [
-    {
-      unit: "per person",
-      description: "",
-      name: "Lunch",
-      price: 20,
-      id: "6jBRtjCwQSmfS94SRfMg",
-      tenantId: "tenant_demo_msl5v6gx"
-    },
-    {
-      tenantId: "tenant_demo_msl5v6gx",
-      price: 20,
-      unit: "per person",
-      id: "J0BYE6VpWxtWXy5RKPF9",
-      description: "",
-      name: "Breakfast"
-    },
-    {
-      description: "",
-      tenantId: "tenant_demo_msl5v6gx",
-      id: "febIYN0KXRuQD2DveVQL",
-      unit: "per booking",
-      price: 100,
-      name: "Photographer"
-    }
-  ],
-  exclusions: [
-    "Lunch and personal beverages",
-    "Gratuities for your guide and driver",
-    "Personal souvenir shopping",
-    "Check out package details for inclusion and exclusion!"
-  ],
-  slotCapacity: 0,
-  discountPrice: 19,
-  supplierName: "",
-  featuredImage: "/api/uploads/FQRNDs8llr6LOi49CLO7",
-  belowTitleLabelId: "",
-  inclusions: [
-    "Private hotel pick-up and drop-off in an air-conditioned car",
-    "Professional English-speaking driver and Jeep pilot",
-    "Private 4x4 Jeep for the volcano expedition",
-    "All entrance fees and Kintamani area tickets",
-    "Admission to Batur Natural Hot Spring",
-    "Light breakfast and bottled mineral water",
-    "Check out package details for inclusion and exclusion!"
-  ],
-  categoryId: "ea9bir7uAJwHcMrx6z3R",
+  faqs: [],
+  tourTypeId: "",
   itinerary: [
     {
       description:
-        "Your adventure begins under a blanket of stars. Our friendly driver will meet you right at your hotel lobby in a cozy, private vehicle. As you settle in for a peaceful drive through the quiet Balinese countryside, you can catch up on some sleep before the magic starts.",
+        "Your professional driver meets you at your accommodation in a comfortable, air-conditioned private vehicle. Relax and rest during the scenic early-morning drive winding up into the tranquil highlands of Kintamani.",
+      title: "Pick up from the hotel",
       day: 1,
       pickup: {
-        description: "Pick up from your hotel at 08:00"
-      },
-      title: "Pick up from the hotel"
+        description: "Pick up from your hotel at 03:00"
+      }
     },
     {
+      image: "",
+      title: "Transfer to 4WD Jeep at Base Camp",
       description:
-        "As the air grows crisp and cool, we arrive at our mountain base camp. Here, you'll meet your expert local 4x4 driver and hop into your rugged, custom-built jeep. Feel the anticipation build as we fire up the engine.",
-      image: "/api/uploads/9btO7cYX7Xs6sfMLiaDr",
-      day: 1,
-      title: "Arrival at Mount Batur Base Camp"
-    },
-    {
-      image: "/api/uploads/FQRNDs8llr6LOi49CLO7",
-      title: "Off-Road Ascent & Sunrise Spectacle",
-      description:
-        "We rumble up the volcano’s slopes, navigating the bumpy, unpaved paths in the dark. Arriving at our prime viewpoint, we’ll pour you a steaming cup of Balinese coffee or tea. Watch in awe as the sun slowly peaks over the horizon, lighting up Mount Agung, the caldera lake, and the misty valleys below.",
+        "Arrive at the Kintamani base camp where your specialized mountain 4WD Jeep driver welcomes you. Receive a short safety briefing before climbing aboard your rugged vintage 4x4 Jeep for the exhilarating ascent through pine forests and mountain trails.",
       day: 1
     },
     {
-      title: "Exploring the Lunar Black Lava Fields",
+      day: 1,
+      image: "",
+      title: "Mount Batur Sunrise Viewing & Breakfast",
+      description:
+        "Park at a prime panoramic sunrise deck perched high on the volcano's eastern flank. Enjoy a freshly prepared light breakfast with warm coffee or hot tea while watching the sun rise above a magical blanket of clouds, framing Mount Abang and Mount Rinjani."
+    },
+    {
       day: 1,
       description:
-        "After sunrise, we drive down into the dramatic caldera to explore the vast black lava fields left by the historic 1963 eruption. The contrasts of black basalt rock against the morning sky look like another planet—perfect for incredible photos.",
-      image: "/api/uploads/ZGwpuAc3k1ej8Hc0Bzcq"
+        "Descend along craggy volcanic paths into the monumental Black Lava basin sculpted by the historic 1963 eruption. Explore towering volcanic formations, marvel at the raw geological power of Batur, and take extraordinary off-road photos.",
+      image: "",
+      title: "Off-Road Black Lava Adventure"
     },
     {
       description:
-        "On our way back down, we can customize your morning. Choose to soak your muscles in the mineral-rich geothermal waters of a lakeside hot spring, or stop by a local plantation to taste freshly brewed Balinese coffee and herbal teas.",
+        "Immerse yourself in steaming mineral-rich thermal springs perched on the shores of Lake Batur, soothing tired muscles while gazing at the towering crater walls. Afterwards, visit a lush jungle plantation to sample freshly roasted Balinese coffees and fragrant spices.",
       day: 1,
-      image: "/api/uploads/XCCqJ3Nb54gxv7BkamCI",
-      title: "Optional Coffee Plantation or Hot Spring Visit"
+      image: "",
+      title: "Batur Natural Hot Springs & Coffee Plantation"
     },
     {
-      image: "/api/uploads/STzGeQXFLLBSZaD6NK7d",
       day: 1,
-      title: "Back to hotel",
+      image: "",
       description:
-        "With hearts full and cameras packed with spectacular memories, we tuck you back into our comfortable private car. Relax and reflect on your magical volcanic adventure as we drive you safely back to your hotel door."
+        "Sit back and unwind in your private air-conditioned vehicle as your driver transports you safely back down the highlands. Return smoothly to your hotel lobby with unforgettable mountain memories and camera rolls filled with golden hour vistas.",
+      title: "Back to hotel"
     }
   ],
-  meetingPoint: "Your Hotel",
-  faqs: [],
+  createdAt: {
+    type: "firestore/timestamp/1.0",
+    seconds: 1792583369,
+    nanoseconds: 349000000
+  },
+  belowTitleLabelId: "",
+  slug: "bali-mount-batur-sunrise-jeep-black-lava-with-hot-springs-1486-1920",
+  timeSlots: ["02:30", "03:00", "03:30"],
+  cutOffNotice: "",
+  multiDayItinerary: [],
+  transportIds: ["3kDrMDyGCdkZC6sT7UJy"],
+  tourDurationType: "single_day",
   accommodations: [],
+  maxCapacity: 0,
+  updatedAt: {
+    type: "firestore/timestamp/1.0",
+    seconds: 1792583724,
+    nanoseconds: 155000000
+  },
+  location: "Kintamani",
+  categoryId: "ea9bir7uAJwHcMrx6z3R",
   locationMapUrl:
-    "https://www.openstreetmap.org/export/embed.html?bbox=115.3876991,-8.2304056,115.3877991,-8.2303056&layer=mapnik&marker=-8.2303556,115.3877491",
+    "https://www.openstreetmap.org/export/embed.html?bbox=115.3788991,-8.2426056,115.3789991,-8.2425056&layer=mapnik&marker=-8.2425556,115.3789491",
+  tenantId: "tenant_explorebalitours_mv3ucul5",
+  meetingPoint: "Your Hotel Lobby in Bali",
+  importantInfo:
+    "Please wear warm layers, a windbreaker jacket, and sturdy closed-toe walking shoes as early morning mountain temperatures can drop significantly. Bring swimwear, a change of clothes, sunscreen, sunglasses, and a camera to capture the stunning scenery.",
+  addOns: [],
   packages: [
     {
+      meetingPoint: "Hotel Lobby",
       exclusions: [
-        "Lunch",
-        "Photographer",
-        "Personal shopping",
-        "Travel Insurance",
-        "Tips & Gratuities"
+        "Batur Natural Hot Spring admission",
+        "Luwak coffee tasting",
+        "Personal expenses and lunch",
+        "Check out package details for inclusion and exclusion!"
       ],
+      transportIds: [
+        "3kDrMDyGCdkZC6sT7UJy",
+        "pZC33jBsTUFnkGM9ULmB",
+        "F8XZL69cJOwYnpGhBKJ2",
+        "NQzrxPd6Z9V62Hh0q8pj",
+        "2FPBnZUUAkawv61xrvpZ",
+        "53L8i2nW4jKULuEL2xkh",
+        "6sj3Zmc7Il5XizL9Qkv6",
+        "JcWE2aFc3dhKqNwGWPXj",
+        "zzzwN7Ua6wjps97LpjpQ",
+        "JZqqdiIEXOyH1deMyXCv",
+        "AUCf2PF7GdGDTzQZoo7u"
+      ],
+      name: "Easy Package",
+      pickupAreas: "Ubud, Sanur, Kuta, Seminyak, Canggu, Nusa Dua, Jimbaran",
+      meetingPointType: "pickup",
       tiers: [
         {
           childPrice: 50,
+          adultPrice: 65,
           maxParticipants: 1,
-          minParticipants: 1,
-          adultPrice: 50
+          minParticipants: 1
         },
         {
+          childPrice: 32,
+          minParticipants: 2,
           maxParticipants: 3,
-          childPrice: 19,
-          adultPrice: 25,
-          minParticipants: 2
+          adultPrice: 42
         },
         {
-          childPrice: 19,
+          adultPrice: 36,
           maxParticipants: 5,
           minParticipants: 4,
-          adultPrice: 20
+          childPrice: 28
         },
         {
+          childPrice: 25,
+          adultPrice: 32,
           minParticipants: 6,
-          childPrice: 19,
-          adultPrice: 19,
           maxParticipants: 10
         }
       ],
       details:
-        "Perfect for travelers who want a seamless, hassle-free itinerary without the guesswork. This package takes care of all logistical essentials—from comfortable, air-conditioned transfers and expert local guidance to pre-arranged admission tickets for Bali’s top attractions. It’s an ideal, straightforward choice for independent explorers who prefer to handle their own dining preferences along the way.",
-      inclusions: [
-        "AC transport",
-        "Tour guide",
-        "Entrance tickets",
-        "Bottled water"
-      ],
-      name: "Easy Package",
-      transportIds: [
-        "3kDrMDyGCdkZC6sT7UJy",
-        "pZC33jBsTUFnkGM9ULmB",
-        "F8XZL69cJOwYnpGhBKJ2",
-        "NQzrxPd6Z9V62Hh0q8pj",
-        "2FPBnZUUAkawv61xrvpZ",
-        "53L8i2nW4jKULuEL2xkh",
-        "6sj3Zmc7Il5XizL9Qkv6",
-        "JcWE2aFc3dhKqNwGWPXj",
-        "zzzwN7Ua6wjps97LpjpQ",
-        "JZqqdiIEXOyH1deMyXCv",
-        "AUCf2PF7GdGDTzQZoo7u"
-      ],
-      meetingPoint: "Toya Devasya\nhttps://maps.app.goo.gl/uU8hcZVc417nfjUp9",
+        "Includes private return hotel transfers, open-roof 4WD Jeep ride, sunrise viewpoint admission, and warm breakfast with hot coffee or tea.",
       description:
-        "Perfect for travelers who want a seamless, hassle-free itinerary without the guesswork. This package takes care of all logistical essentials—from comfortable, air-conditioned transfers and expert local guidance to pre-arranged admission tickets for Bali’s top attractions. It’s an ideal, straightforward choice for independent explorers who prefer to handle their own dining preferences along the way.",
-      pickupAreas: "Most area are covered for pick up and drop off",
-      meetingPointType: "Meeting Point"
-    },
-    {
-      transportIds: [
-        "3kDrMDyGCdkZC6sT7UJy",
-        "pZC33jBsTUFnkGM9ULmB",
-        "F8XZL69cJOwYnpGhBKJ2",
-        "NQzrxPd6Z9V62Hh0q8pj",
-        "2FPBnZUUAkawv61xrvpZ",
-        "53L8i2nW4jKULuEL2xkh",
-        "6sj3Zmc7Il5XizL9Qkv6",
-        "JcWE2aFc3dhKqNwGWPXj",
-        "zzzwN7Ua6wjps97LpjpQ",
-        "JZqqdiIEXOyH1deMyXCv",
-        "AUCf2PF7GdGDTzQZoo7u"
-      ],
-      details:
-        "Designed for a completely worry-free day out, this upgraded package bundles all the essentials of the Easy tier with authentic culinary experiences. Enjoy guided sightseeing paired with handpicked local dining or scenic meal stops, allowing you to relax, savor traditional flavors, and immerse yourself fully in the culture without having to worry about where to eat next.",
-      meetingPoint: "Toya Devasya\nhttps://maps.app.goo.gl/uU8hcZVc417nfjUp9",
-      tiers: [
-        {
-          childPrice: 90,
-          minParticipants: 1,
-          maxParticipants: 1,
-          adultPrice: 100
-        },
-        {
-          adultPrice: 60,
-          minParticipants: 2,
-          maxParticipants: 3,
-          childPrice: 40
-        },
-        {
-          childPrice: 40,
-          maxParticipants: 5,
-          minParticipants: 4,
-          adultPrice: 50
-        },
-        {
-          childPrice: 40,
-          maxParticipants: 10,
-          minParticipants: 6,
-          adultPrice: 40
-        }
-      ],
-      name: "Comfy Package",
-      exclusions: [
-        "Photographer",
-        "Personal shopping",
-        "Travel Insurance",
-        "Tips & Gratuities"
-      ],
-      meetingPointType: "Meeting Point",
-      description:
-        "Designed for a completely worry-free day out, this upgraded package bundles all the essentials of the Easy tier with authentic culinary experiences. Enjoy guided sightseeing paired with handpicked local dining or scenic meal stops, allowing you to relax, savor traditional flavors, and immerse yourself fully in the culture without having to worry about where to eat next.",
-      pickupAreas: "Most area are covered for pick up and drop off",
+        "Perfect for budget-conscious explorers who want the core thrill of the Mount Batur sunrise and Black Lava Jeep tour.",
       inclusions: [
-        "AC transport",
-        "Tour guide",
-        "Entrance tickets",
-        "Bottled water",
-        "Lunch"
+        "Private round-trip hotel transfer",
+        "Classic 4WD Jeep with experienced mountain driver",
+        "Mount Batur sunrise viewing ticket",
+        "Light breakfast and hot tea or coffee",
+        "Black Lava exploration stop"
       ]
     },
     {
-      exclusions: [
-        "Personal shopping",
-        "Travel Insurance",
-        "Tips & Gratuities"
-      ],
-      name: "Exclusive Package",
-      tiers: [
-        {
-          childPrice: 90,
-          minParticipants: 1,
-          maxParticipants: 1,
-          adultPrice: 150
-        },
-        {
-          minParticipants: 2,
-          adultPrice: 80,
-          childPrice: 40,
-          maxParticipants: 3
-        },
-        {
-          minParticipants: 4,
-          childPrice: 40,
-          adultPrice: 60,
-          maxParticipants: 5
-        },
-        {
-          maxParticipants: 10,
-          adultPrice: 50,
-          minParticipants: 6,
-          childPrice: 40
-        }
-      ],
+      meetingPoint: "Hotel Lobby",
       inclusions: [
-        "AC transport",
-        "Tour guide",
-        "Entrance tickets",
-        "Bottled water",
-        "Lunch",
-        "Photographer"
+        "Private round-trip hotel transfer",
+        "Classic 4WD Jeep tour with local guide",
+        "Sunrise viewing point and light breakfast",
+        "Black Lava off-road expedition",
+        "Batur Natural Hot Springs ticket, locker, and towel",
+        "Coffee plantation herbal tea and coffee tasting"
       ],
-      meetingPoint: "Toya Devasya\nhttps://maps.app.goo.gl/uU8hcZVc417nfjUp9",
+      pickupAreas: "Ubud, Sanur, Kuta, Seminyak, Canggu, Nusa Dua, Jimbaran",
+      details:
+        "Includes private transfers, 4x4 Jeep tour, sunrise light breakfast, Black Lava adventure, entrance ticket and towel rental at Batur Natural Hot Springs, and visit to an organic spice plantation.",
+      name: "Comfy Package",
       transportIds: [
         "3kDrMDyGCdkZC6sT7UJy",
+        "pZC33jBsTUFnkGM9ULmB",
         "F8XZL69cJOwYnpGhBKJ2",
         "NQzrxPd6Z9V62Hh0q8pj",
         "2FPBnZUUAkawv61xrvpZ",
@@ -505,65 +373,168 @@ export const SAMPLE_MOUNT_BATUR_TOUR: TourDocument = {
         "JZqqdiIEXOyH1deMyXCv",
         "AUCf2PF7GdGDTzQZoo7u"
       ],
-      details:
-        "The ultimate premium experience tailored for those who want absolute peace of mind and unforgettable memories. Alongside full VIP inclusions, dining, and comprehensive travel insurance, this package features a dedicated professional photographer to capture your best moments against Bali's stunning backdrops. It is the ultimate all-inclusive choice for couples, families, and special occasions.",
+      exclusions: [
+        "A la carte lunch",
+        "Luwak coffee tasting fee",
+        "Driver and guide gratuities",
+        "Check out package details for inclusion and exclusion!"
+      ],
+      meetingPointType: "pickup",
+      tiers: [
+        {
+          maxParticipants: 1,
+          minParticipants: 1,
+          childPrice: 58,
+          adultPrice: 75
+        },
+        {
+          maxParticipants: 3,
+          minParticipants: 2,
+          childPrice: 38,
+          adultPrice: 49
+        },
+        {
+          childPrice: 33,
+          minParticipants: 4,
+          maxParticipants: 5,
+          adultPrice: 42
+        },
+        {
+          childPrice: 29,
+          maxParticipants: 10,
+          minParticipants: 6,
+          adultPrice: 37
+        }
+      ],
       description:
-        "The ultimate premium experience tailored for those who want absolute peace of mind and unforgettable memories. Alongside full VIP inclusions, dining, and comprehensive travel insurance, this package features a dedicated professional photographer to capture your best moments against Bali's stunning backdrops. It is the ultimate all-inclusive choice for couples, families, and special occasions.",
-      pickupAreas: "Most area are covered for pick up and drop off",
-      meetingPointType: "Meeting Point"
+        "Our most popular package combining the iconic sunrise Jeep journey with relaxing mineral hot springs and a cultural coffee tasting."
+    },
+    {
+      tiers: [
+        {
+          maxParticipants: 1,
+          minParticipants: 1,
+          adultPrice: 95,
+          childPrice: 75
+        },
+        {
+          minParticipants: 2,
+          childPrice: 49,
+          maxParticipants: 3,
+          adultPrice: 64
+        },
+        {
+          maxParticipants: 5,
+          minParticipants: 4,
+          childPrice: 42,
+          adultPrice: 54
+        },
+        {
+          minParticipants: 6,
+          maxParticipants: 10,
+          adultPrice: 48,
+          childPrice: 37
+        }
+      ],
+      exclusions: [
+        "Alcoholic beverages",
+        "Optional Luwak coffee cup",
+        "Personal shopping expenses",
+        "Check out package details for inclusion and exclusion!"
+      ],
+      pickupAreas:
+        "Ubud, Sanur, Kuta, Seminyak, Canggu, Nusa Dua, Jimbaran, Uluwatu",
+      meetingPoint: "Hotel Lobby",
+      name: "Exclusive Package",
+      meetingPointType: "pickup",
+      inclusions: [
+        "VIP private round-trip hotel transfer",
+        "Dedicated private 4WD Jeep with senior mountain guide",
+        "Sunrise breakfast atop Mount Batur",
+        "Extended Black Lava and Black Sand off-road tour",
+        "Batur Natural Hot Spring admission, towel, and locker",
+        "Buffet lunch at a scenic caldera restaurant overlooking Mount Batur",
+        "Complete Balinese coffee and herbal tea tasting experience"
+      ],
+      details:
+        "Comprehensive VIP package with premium private transfers, 4WD Jeep, lakeside hot spring entry, panoramic restaurant lunch overlooking the caldera, and plantation tasting flight.",
+      transportIds: [
+        "3kDrMDyGCdkZC6sT7UJy",
+        "pZC33jBsTUFnkGM9ULmB",
+        "F8XZL69cJOwYnpGhBKJ2",
+        "NQzrxPd6Z9V62Hh0q8pj",
+        "2FPBnZUUAkawv61xrvpZ",
+        "53L8i2nW4jKULuEL2xkh",
+        "6sj3Zmc7Il5XizL9Qkv6",
+        "JcWE2aFc3dhKqNwGWPXj",
+        "zzzwN7Ua6wjps97LpjpQ",
+        "JZqqdiIEXOyH1deMyXCv",
+        "AUCf2PF7GdGDTzQZoo7u"
+      ],
+      description:
+        "The ultimate VIP all-inclusive mountain retreat featuring sunrise Jeep, Black Lava, hot springs, authentic buffet lunch, and premium amenities."
     }
   ],
-  timeSlots: ["03:00", "03:30", "04:00"],
-  maxCapacity: 0
+  inclusions: [
+    "Private air-conditioned hotel round-trip transfers with friendly English-speaking driver",
+    "Private 4WD open-top Jeep tour with experienced local volcanic guide-driver",
+    "Light breakfast and hot coffee or tea at the Mount Batur sunrise vantage point",
+    "All entrance fees and government tickets to Kintamani and Mount Batur conservation area",
+    "Batur Natural Hot Springs entry ticket with complimentary towel and locker access",
+    "Guided tasting flight of local Balinese coffees, herbal teas, and traditional cocoa",
+    "Check out package details for inclusion and exclusion!"
+  ],
+  slotCapacity: 0,
+  locationId: "ERfC8Ko3SaLg95j5Pqee"
 };
 
 export const REQUIRED_SCHEMA_KEYS: (keyof TourDocument)[] = [
-  "supplierId",
-  "updatedAt",
-  "description",
-  "tourTypeId",
-  "transportIds",
-  "slug",
   "title",
-  "languages",
-  "multiDayGuides",
-  "imageLabelId",
-  "gallery",
-  "tenantId",
-  "labelIds",
-  "location",
-  "infoSections",
-  "addOnIds",
-  "createdAt",
-  "status",
-  "transports",
-  "priceLabelId",
-  "regularPrice",
-  "cutOffHours",
-  "importantInfo",
-  "multiDayItinerary",
-  "highlights",
   "duration",
-  "locationId",
-  "cutOffNotice",
-  "tourDurationType",
-  "addOns",
-  "exclusions",
-  "slotCapacity",
-  "discountPrice",
+  "gallery",
+  "infoSections",
+  "description",
+  "imageLabelId",
+  "highlights",
+  "priceLabelId",
   "supplierName",
+  "status",
+  "multiDayGuides",
+  "exclusions",
+  "supplierId",
+  "transports",
   "featuredImage",
-  "belowTitleLabelId",
-  "inclusions",
-  "categoryId",
-  "itinerary",
-  "meetingPoint",
+  "labelIds",
+  "cutOffHours",
+  "regularPrice",
+  "languages",
+  "discountPrice",
+  "addOnIds",
   "faqs",
-  "accommodations",
-  "locationMapUrl",
-  "packages",
+  "tourTypeId",
+  "itinerary",
+  "createdAt",
+  "belowTitleLabelId",
+  "slug",
   "timeSlots",
-  "maxCapacity"
+  "cutOffNotice",
+  "multiDayItinerary",
+  "transportIds",
+  "tourDurationType",
+  "accommodations",
+  "maxCapacity",
+  "updatedAt",
+  "location",
+  "categoryId",
+  "locationMapUrl",
+  "tenantId",
+  "meetingPoint",
+  "importantInfo",
+  "addOns",
+  "packages",
+  "inclusions",
+  "slotCapacity",
+  "locationId"
 ];
 
 export function normalizeToExactTourSchema(
@@ -571,201 +542,192 @@ export function normalizeToExactTourSchema(
   defaults: TenantDefaults = DEFAULT_TENANT_CONFIG
 ): TourDocument {
   const nowSeconds = Math.floor(Date.now() / 1000);
-  const defaultGallery = SAMPLE_MOUNT_BATUR_TOUR.gallery;
 
   const ordered: TourDocument = {
-    supplierId: raw.supplierId ?? defaults.supplierId,
-    updatedAt: raw.updatedAt ?? {
-      type: "firestore/timestamp/1.0",
-      seconds: nowSeconds,
-      nanoseconds: 192000000
-    },
+    title: raw.title || "Untitled Tour Experience",
+    duration: raw.duration || "8-10 Hours",
+    gallery: Array.isArray(raw.gallery) ? raw.gallery : [],
+    infoSections:
+      Array.isArray(raw.infoSections) && raw.infoSections.length > 0
+        ? raw.infoSections.map((sec) => ({
+            title: sec.title ?? "",
+            content: Array.isArray(sec.content) ? sec.content : []
+          }))
+        : SAMPLE_MOUNT_BATUR_TOUR.infoSections,
     description: raw.description || SAMPLE_MOUNT_BATUR_TOUR.description,
+    imageLabelId: raw.imageLabelId || defaults.imageLabelId,
+    highlights:
+      Array.isArray(raw.highlights) && raw.highlights.length > 0
+        ? raw.highlights
+        : SAMPLE_MOUNT_BATUR_TOUR.highlights,
+    priceLabelId: raw.priceLabelId ?? "",
+    supplierName: raw.supplierName ?? defaults.supplierName,
+    status: raw.status || defaults.status,
+    multiDayGuides: Array.isArray(raw.multiDayGuides) ? raw.multiDayGuides : [],
+    exclusions:
+      Array.isArray(raw.exclusions) && raw.exclusions.length > 0
+        ? raw.exclusions
+        : SAMPLE_MOUNT_BATUR_TOUR.exclusions,
+    supplierId: raw.supplierId ?? defaults.supplierId,
+    transports: Array.isArray(raw.transports) ? raw.transports : [],
+    featuredImage: typeof raw.featuredImage === "string" ? raw.featuredImage : "",
+    labelIds:
+      Array.isArray(raw.labelIds) && raw.labelIds.length > 0
+        ? raw.labelIds
+        : [defaults.imageLabelId],
+    cutOffHours:
+      typeof raw.cutOffHours === "number" && !Number.isNaN(raw.cutOffHours)
+        ? raw.cutOffHours
+        : defaults.cutOffHours,
+    regularPrice:
+      typeof raw.regularPrice === "number" && !Number.isNaN(raw.regularPrice)
+        ? raw.regularPrice
+        : 85,
+    languages: Array.isArray(raw.languages) ? raw.languages : [],
+    discountPrice:
+      typeof raw.discountPrice === "number" && !Number.isNaN(raw.discountPrice)
+        ? raw.discountPrice
+        : 32,
+    addOnIds:
+      Array.isArray(raw.addOnIds) && raw.addOnIds.length > 0
+        ? raw.addOnIds
+        : SAMPLE_MOUNT_BATUR_TOUR.addOnIds,
+    faqs: Array.isArray(raw.faqs) ? raw.faqs : [],
     tourTypeId: raw.tourTypeId ?? "",
-    transportIds:
-      Array.isArray(raw.transportIds) && raw.transportIds.length > 0
-        ? raw.transportIds
-        : [defaults.primaryTransportId],
+    itinerary:
+      Array.isArray(raw.itinerary) && raw.itinerary.length > 0
+        ? raw.itinerary.map((step, idx) => {
+            if (idx === 0) {
+              return {
+                description: step.description || "",
+                title: step.title || "Pick up from the hotel",
+                day: typeof step.day === "number" ? step.day : 1,
+                pickup: {
+                  description:
+                    step.pickup?.description ||
+                    "Pick up from your hotel at 03:00"
+                }
+              };
+            }
+            return {
+              image: typeof step.image === "string" ? step.image : "",
+              title: step.title || `Stop ${idx + 1}`,
+              description: step.description || "",
+              day: typeof step.day === "number" ? step.day : 1
+            };
+          })
+        : SAMPLE_MOUNT_BATUR_TOUR.itinerary,
+    createdAt: raw.createdAt ?? {
+      type: "firestore/timestamp/1.0",
+      seconds: nowSeconds - 355,
+      nanoseconds: 349000000
+    },
+    belowTitleLabelId: raw.belowTitleLabelId ?? "",
     slug:
       raw.slug ||
       `${(raw.title || "bali-private-tour")
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "")}-${Math.floor(1000 + Math.random() * 9000)}`,
-    title: raw.title || "Untitled Tour Experience",
-    languages: Array.isArray(raw.languages) ? raw.languages : [],
-    multiDayGuides: Array.isArray(raw.multiDayGuides) ? raw.multiDayGuides : [],
-    imageLabelId: raw.imageLabelId || defaults.imageLabelId,
-    gallery:
-      Array.isArray(raw.gallery) && raw.gallery.length > 0
-        ? raw.gallery
-        : defaultGallery,
-    tenantId: raw.tenantId || defaults.tenantId,
-    labelIds:
-      Array.isArray(raw.labelIds) && raw.labelIds.length > 0
-        ? raw.labelIds
-        : [defaults.imageLabelId],
-    location: raw.location || "Bali",
-    infoSections:
-      Array.isArray(raw.infoSections) && raw.infoSections.length > 0
-        ? raw.infoSections.map((sec) => ({
-            content: Array.isArray(sec.content) ? sec.content : [],
-            title: sec.title ?? ""
-          }))
-        : SAMPLE_MOUNT_BATUR_TOUR.infoSections,
-    addOnIds:
-      Array.isArray(raw.addOnIds) && raw.addOnIds.length > 0
-        ? raw.addOnIds
-        : SAMPLE_MOUNT_BATUR_TOUR.addOnIds,
-    createdAt: raw.createdAt ?? {
-      type: "firestore/timestamp/1.0",
-      seconds: nowSeconds - 3600,
-      nanoseconds: 562000000
-    },
-    status: raw.status || defaults.status,
-    transports: Array.isArray(raw.transports) ? raw.transports : [],
-    priceLabelId: raw.priceLabelId ?? "",
-    regularPrice:
-      typeof raw.regularPrice === "number" && !Number.isNaN(raw.regularPrice)
-        ? raw.regularPrice
-        : 100,
-    cutOffHours:
-      typeof raw.cutOffHours === "number" && !Number.isNaN(raw.cutOffHours)
-        ? raw.cutOffHours
-        : defaults.cutOffHours,
-    importantInfo:
-      raw.importantInfo || SAMPLE_MOUNT_BATUR_TOUR.importantInfo,
+        .replace(/(^-|-$)/g, "")}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`,
+    timeSlots:
+      Array.isArray(raw.timeSlots) && raw.timeSlots.length > 0
+        ? raw.timeSlots
+        : ["02:30", "03:00", "03:30"],
+    cutOffNotice: raw.cutOffNotice ?? "",
     multiDayItinerary: Array.isArray(raw.multiDayItinerary)
       ? raw.multiDayItinerary
       : [],
-    highlights:
-      Array.isArray(raw.highlights) && raw.highlights.length > 0
-        ? raw.highlights
-        : SAMPLE_MOUNT_BATUR_TOUR.highlights,
-    duration: raw.duration || "6-8 Hours",
-    locationId: raw.locationId || defaults.locationId,
-    cutOffNotice: raw.cutOffNotice ?? "",
+    transportIds:
+      Array.isArray(raw.transportIds) && raw.transportIds.length > 0
+        ? raw.transportIds
+        : [defaults.primaryTransportId],
     tourDurationType: raw.tourDurationType || "single_day",
-    addOns:
-      Array.isArray(raw.addOns) && raw.addOns.length > 0
-        ? raw.addOns.map((addon, idx) => ({
-            unit: addon.unit || "per person",
-            description: addon.description ?? "",
-            name: addon.name || `Add-On ${idx + 1}`,
-            price: typeof addon.price === "number" ? addon.price : 20,
-            id:
-              addon.id ||
-              SAMPLE_MOUNT_BATUR_TOUR.addOnIds[idx] ||
-              `addon_${idx + 1}`,
-            tenantId: addon.tenantId || defaults.tenantId
-          }))
-        : SAMPLE_MOUNT_BATUR_TOUR.addOns.map((a) => ({
-            ...a,
-            tenantId: defaults.tenantId
-          })),
-    exclusions:
-      Array.isArray(raw.exclusions) && raw.exclusions.length > 0
-        ? raw.exclusions
-        : SAMPLE_MOUNT_BATUR_TOUR.exclusions,
-    slotCapacity: typeof raw.slotCapacity === "number" ? raw.slotCapacity : 0,
-    discountPrice:
-      typeof raw.discountPrice === "number" && !Number.isNaN(raw.discountPrice)
-        ? raw.discountPrice
-        : 19,
-    supplierName: raw.supplierName ?? defaults.supplierName,
-    featuredImage:
-      raw.featuredImage || SAMPLE_MOUNT_BATUR_TOUR.featuredImage,
-    belowTitleLabelId: raw.belowTitleLabelId ?? "",
-    inclusions:
-      Array.isArray(raw.inclusions) && raw.inclusions.length > 0
-        ? raw.inclusions
-        : SAMPLE_MOUNT_BATUR_TOUR.inclusions,
-    categoryId: raw.categoryId || defaults.categoryId,
-    itinerary:
-      Array.isArray(raw.itinerary) && raw.itinerary.length > 0
-        ? raw.itinerary.map((step, idx) => {
-            const item: TourItineraryStep = {
-              description: step.description || "",
-              day: typeof step.day === "number" ? step.day : 1,
-              title: step.title || `Stop ${idx + 1}`
-            };
-            if (step.pickup?.description) {
-              item.pickup = { description: step.pickup.description };
-            } else if (idx === 0) {
-              item.pickup = { description: "Pick up from your hotel at 08:00" };
-            } else {
-              item.image =
-                step.image ||
-                SAMPLE_MOUNT_BATUR_TOUR.itinerary[
-                  Math.min(idx, SAMPLE_MOUNT_BATUR_TOUR.itinerary.length - 1)
-                ]?.image ||
-                "/api/uploads/FQRNDs8llr6LOi49CLO7";
-            }
-            return item;
-          })
-        : SAMPLE_MOUNT_BATUR_TOUR.itinerary,
-    meetingPoint: raw.meetingPoint || "Your Hotel",
-    faqs: Array.isArray(raw.faqs) ? raw.faqs : [],
     accommodations: Array.isArray(raw.accommodations) ? raw.accommodations : [],
+    maxCapacity: typeof raw.maxCapacity === "number" ? raw.maxCapacity : 0,
+    updatedAt: raw.updatedAt ?? {
+      type: "firestore/timestamp/1.0",
+      seconds: nowSeconds,
+      nanoseconds: 155000000
+    },
+    location: raw.location || "Kintamani",
+    categoryId: raw.categoryId || defaults.categoryId,
     locationMapUrl:
       raw.locationMapUrl || SAMPLE_MOUNT_BATUR_TOUR.locationMapUrl,
+    tenantId: raw.tenantId || defaults.tenantId,
+    meetingPoint: raw.meetingPoint || "Your Hotel Lobby in Bali",
+    importantInfo:
+      raw.importantInfo || SAMPLE_MOUNT_BATUR_TOUR.importantInfo,
+    addOns: Array.isArray(raw.addOns) ? raw.addOns : [],
     packages:
       Array.isArray(raw.packages) && raw.packages.length > 0
-        ? raw.packages.map((pkg, idx) => ({
-            exclusions:
+        ? raw.packages.map((pkg, idx) => {
+            const rawExclusions =
               Array.isArray(pkg.exclusions) && pkg.exclusions.length > 0
                 ? pkg.exclusions
                 : SAMPLE_MOUNT_BATUR_TOUR.packages[
                     Math.min(idx, SAMPLE_MOUNT_BATUR_TOUR.packages.length - 1)
-                  ].exclusions,
-            tiers:
-              Array.isArray(pkg.tiers) && pkg.tiers.length > 0
-                ? pkg.tiers.map((t) => ({
-                    childPrice: Number(t.childPrice ?? 19),
-                    maxParticipants: Number(t.maxParticipants ?? 1),
-                    minParticipants: Number(t.minParticipants ?? 1),
-                    adultPrice: Number(t.adultPrice ?? 50)
-                  }))
-                : SAMPLE_MOUNT_BATUR_TOUR.packages[
-                    Math.min(idx, SAMPLE_MOUNT_BATUR_TOUR.packages.length - 1)
-                  ].tiers,
-            details:
-              pkg.details ||
-              pkg.description ||
-              SAMPLE_MOUNT_BATUR_TOUR.packages[
-                Math.min(idx, SAMPLE_MOUNT_BATUR_TOUR.packages.length - 1)
-              ].details,
-            inclusions:
-              Array.isArray(pkg.inclusions) && pkg.inclusions.length > 0
-                ? pkg.inclusions
-                : SAMPLE_MOUNT_BATUR_TOUR.packages[
-                    Math.min(idx, SAMPLE_MOUNT_BATUR_TOUR.packages.length - 1)
-                  ].inclusions,
-            name: pkg.name || `Package ${idx + 1}`,
-            transportIds:
-              Array.isArray(pkg.transportIds) && pkg.transportIds.length > 0
-                ? pkg.transportIds
-                : defaults.packageTransportIds,
-            meetingPoint:
-              pkg.meetingPoint ||
-              "Toya Devasya\nhttps://maps.app.goo.gl/uU8hcZVc417nfjUp9",
-            description:
-              pkg.description ||
-              pkg.details ||
-              SAMPLE_MOUNT_BATUR_TOUR.packages[
-                Math.min(idx, SAMPLE_MOUNT_BATUR_TOUR.packages.length - 1)
-              ].description,
-            pickupAreas:
-              pkg.pickupAreas ||
-              "Most area are covered for pick up and drop off",
-            meetingPointType: pkg.meetingPointType || "Meeting Point"
-          }))
+                  ].exclusions;
+            const exclusionsWithFooter = rawExclusions.some((e) =>
+              e.toLowerCase().includes("check out package details")
+            )
+              ? rawExclusions
+              : [
+                  ...rawExclusions,
+                  "Check out package details for inclusion and exclusion!"
+                ];
+
+            return {
+              meetingPoint: pkg.meetingPoint || "Hotel Lobby",
+              exclusions: exclusionsWithFooter,
+              transportIds:
+                Array.isArray(pkg.transportIds) && pkg.transportIds.length > 0
+                  ? pkg.transportIds
+                  : defaults.packageTransportIds,
+              name: pkg.name || `Package ${idx + 1}`,
+              pickupAreas:
+                pkg.pickupAreas ||
+                (idx === 2
+                  ? "Ubud, Sanur, Kuta, Seminyak, Canggu, Nusa Dua, Jimbaran, Uluwatu"
+                  : "Ubud, Sanur, Kuta, Seminyak, Canggu, Nusa Dua, Jimbaran"),
+              meetingPointType: pkg.meetingPointType || "pickup",
+              tiers:
+                Array.isArray(pkg.tiers) && pkg.tiers.length > 0
+                  ? pkg.tiers.map((t) => ({
+                      childPrice: Number(t.childPrice ?? 25),
+                      adultPrice: Number(t.adultPrice ?? 50),
+                      maxParticipants: Number(t.maxParticipants ?? 1),
+                      minParticipants: Number(t.minParticipants ?? 1)
+                    }))
+                  : SAMPLE_MOUNT_BATUR_TOUR.packages[
+                      Math.min(idx, SAMPLE_MOUNT_BATUR_TOUR.packages.length - 1)
+                    ].tiers,
+              details:
+                pkg.details ||
+                pkg.description ||
+                SAMPLE_MOUNT_BATUR_TOUR.packages[
+                  Math.min(idx, SAMPLE_MOUNT_BATUR_TOUR.packages.length - 1)
+                ].details,
+              description:
+                pkg.description ||
+                pkg.details ||
+                SAMPLE_MOUNT_BATUR_TOUR.packages[
+                  Math.min(idx, SAMPLE_MOUNT_BATUR_TOUR.packages.length - 1)
+                ].description,
+              inclusions:
+                Array.isArray(pkg.inclusions) && pkg.inclusions.length > 0
+                  ? pkg.inclusions
+                  : SAMPLE_MOUNT_BATUR_TOUR.packages[
+                      Math.min(idx, SAMPLE_MOUNT_BATUR_TOUR.packages.length - 1)
+                    ].inclusions
+            };
+          })
         : SAMPLE_MOUNT_BATUR_TOUR.packages,
-    timeSlots:
-      Array.isArray(raw.timeSlots) && raw.timeSlots.length > 0
-        ? raw.timeSlots
-        : ["03:00", "03:30", "04:00"],
-    maxCapacity: typeof raw.maxCapacity === "number" ? raw.maxCapacity : 0
+    inclusions:
+      Array.isArray(raw.inclusions) && raw.inclusions.length > 0
+        ? raw.inclusions
+        : SAMPLE_MOUNT_BATUR_TOUR.inclusions,
+    slotCapacity: typeof raw.slotCapacity === "number" ? raw.slotCapacity : 0,
+    locationId: raw.locationId || defaults.locationId
   };
 
   return ordered;

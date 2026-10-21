@@ -1296,7 +1296,7 @@ export default function App() {
                               day: 1,
                               title: `Stop ${currentTour.itinerary.length + 1}`,
                               description: "Describe the experience at this stop.",
-                              image: "/api/uploads/FQRNDs8llr6LOi49CLO7"
+                              image: ""
                             }
                           ]
                         })

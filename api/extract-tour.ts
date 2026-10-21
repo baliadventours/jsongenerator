@@ -7,8 +7,8 @@ export interface FirestoreTimestamp {
 }
 
 export interface TourInfoSection {
-  content: string[];
   title: string;
+  content: string[];
 }
 
 export interface TourAddOn {
@@ -22,32 +22,32 @@ export interface TourAddOn {
 
 export interface TourItineraryStep {
   description: string;
+  title: string;
   day: number;
   pickup?: {
     description: string;
   };
   image?: string;
-  title: string;
 }
 
 export interface TourPackageTier {
   childPrice: number;
+  adultPrice: number;
   maxParticipants: number;
   minParticipants: number;
-  adultPrice: number;
 }
 
 export interface TourPackage {
-  exclusions: string[];
-  tiers: TourPackageTier[];
-  details: string;
-  inclusions: string[];
-  name: string;
-  transportIds: string[];
   meetingPoint: string;
-  description: string;
+  exclusions: string[];
+  transportIds: string[];
+  name: string;
   pickupAreas: string;
   meetingPointType: string;
+  tiers: TourPackageTier[];
+  details: string;
+  description: string;
+  inclusions: string[];
 }
 
 export interface TourFaq {
@@ -56,52 +56,52 @@ export interface TourFaq {
 }
 
 export interface TourDocument {
-  supplierId: string;
-  updatedAt: FirestoreTimestamp;
-  description: string;
-  tourTypeId: string;
-  transportIds: string[];
-  slug: string;
   title: string;
-  languages: string[];
-  multiDayGuides: unknown[];
-  imageLabelId: string;
-  gallery: string[];
-  tenantId: string;
-  labelIds: string[];
-  location: string;
-  infoSections: TourInfoSection[];
-  addOnIds: string[];
-  createdAt: FirestoreTimestamp;
-  status: string;
-  transports: unknown[];
-  priceLabelId: string;
-  regularPrice: number;
-  cutOffHours: number;
-  importantInfo: string;
-  multiDayItinerary: unknown[];
-  highlights: string[];
   duration: string;
-  locationId: string;
-  cutOffNotice: string;
-  tourDurationType: string;
-  addOns: TourAddOn[];
-  exclusions: string[];
-  slotCapacity: number;
-  discountPrice: number;
+  gallery: string[];
+  infoSections: TourInfoSection[];
+  description: string;
+  imageLabelId: string;
+  highlights: string[];
+  priceLabelId: string;
   supplierName: string;
+  status: string;
+  multiDayGuides: unknown[];
+  exclusions: string[];
+  supplierId: string;
+  transports: unknown[];
   featuredImage: string;
-  belowTitleLabelId: string;
-  inclusions: string[];
-  categoryId: string;
-  itinerary: TourItineraryStep[];
-  meetingPoint: string;
+  labelIds: string[];
+  cutOffHours: number;
+  regularPrice: number;
+  languages: string[];
+  discountPrice: number;
+  addOnIds: string[];
   faqs: TourFaq[];
-  accommodations: unknown[];
-  locationMapUrl: string;
-  packages: TourPackage[];
+  tourTypeId: string;
+  itinerary: TourItineraryStep[];
+  createdAt: FirestoreTimestamp;
+  belowTitleLabelId: string;
+  slug: string;
   timeSlots: string[];
+  cutOffNotice: string;
+  multiDayItinerary: unknown[];
+  transportIds: string[];
+  tourDurationType: string;
+  accommodations: unknown[];
   maxCapacity: number;
+  updatedAt: FirestoreTimestamp;
+  location: string;
+  categoryId: string;
+  locationMapUrl: string;
+  tenantId: string;
+  meetingPoint: string;
+  importantInfo: string;
+  addOns: TourAddOn[];
+  packages: TourPackage[];
+  inclusions: string[];
+  slotCapacity: number;
+  locationId: string;
 }
 
 export interface TenantDefaults {
@@ -118,7 +118,7 @@ export interface TenantDefaults {
 }
 
 const FALLBACK_TENANT_CONFIG: TenantDefaults = {
-  tenantId: "tenant_demo_msl5v6gx",
+  tenantId: "tenant_explorebalitours_mv3ucul5",
   categoryId: "ea9bir7uAJwHcMrx6z3R",
   locationId: "ERfC8Ko3SaLg95j5Pqee",
   imageLabelId: "qkIW1OshbELFkG4LP2eW",
@@ -142,27 +142,10 @@ const FALLBACK_TENANT_CONFIG: TenantDefaults = {
   ]
 };
 
-const DEFAULT_GALLERY = [
-  "/api/uploads/dtB02xUT6sX8ku4JHH33",
-  "/api/uploads/UT29fKQZKh6sYb6zNejl",
-  "/api/uploads/d69p3fdP4yxp3SahvdGw",
-  "/api/uploads/FQRNDs8llr6LOi49CLO7",
-  "/api/uploads/ZGwpuAc3k1ej8Hc0Bzcq",
-  "/api/uploads/X5WGl62sY3nVKMzNMnQY"
-];
-
 const DEFAULT_ADDON_IDS = [
   "6jBRtjCwQSmfS94SRfMg",
   "J0BYE6VpWxtWXy5RKPF9",
   "febIYN0KXRuQD2DveVQL"
-];
-
-const SAMPLE_ITINERARY_IMAGES = [
-  "/api/uploads/9btO7cYX7Xs6sfMLiaDr",
-  "/api/uploads/FQRNDs8llr6LOi49CLO7",
-  "/api/uploads/ZGwpuAc3k1ej8Hc0Bzcq",
-  "/api/uploads/XCCqJ3Nb54gxv7BkamCI",
-  "/api/uploads/STzGeQXFLLBSZaD6NK7d"
 ];
 
 interface ScrapedUrlMetadata {
@@ -263,7 +246,7 @@ async function inspectUrlContent(rawUrl: string): Promise<ScrapedUrlMetadata> {
 
     result.bodyExcerpt = strippedText.slice(0, 4500);
   } catch {
-    // Direct scrape timed out or blocked by Cloudflare; URL slug & Gemini knowledge will be used
+    // Fallback to URL slug hint and Gemini knowledge
   }
 
   return result;
@@ -275,12 +258,12 @@ const TOUR_EXTRACTION_SCHEMA = {
     title: {
       type: Type.STRING,
       description:
-        "Compelling, clean tour title (e.g., 'Mount Batur Jeep 4x4 Sunrise & Black Lava Private Tour')"
+        "Compelling, clean tour title (e.g., 'Mount Batur Sunrise 4WD Jeep, Black Lava & Natural Hot Spring Tour')"
     },
     slug: {
       type: Type.STRING,
       description:
-        "Kebab-case URL slug ending with a 4-digit code (e.g., 'bali-mount-batur-sunrise-jeep-black-lava-with-hot-springs-1486')"
+        "Kebab-case URL slug ending with two 4-digit numbers (e.g., 'bali-mount-batur-sunrise-jeep-black-lava-with-hot-springs-1486-1920')"
     },
     description: {
       type: Type.STRING,
@@ -294,7 +277,7 @@ const TOUR_EXTRACTION_SCHEMA = {
     },
     duration: {
       type: Type.STRING,
-      description: "Duration range (e.g., '6-8 Hours', '8-10 Hours')"
+      description: "Duration range (e.g., '8-10 Hours', '6-8 Hours')"
     },
     tourDurationType: {
       type: Type.STRING,
@@ -302,11 +285,11 @@ const TOUR_EXTRACTION_SCHEMA = {
     },
     regularPrice: {
       type: Type.NUMBER,
-      description: "Standard base price in USD (e.g., 100)"
+      description: "Standard base price in USD (e.g., 85)"
     },
     discountPrice: {
       type: Type.NUMBER,
-      description: "Starting lowest tier price in USD (e.g., 19 or 35)"
+      description: "Starting lowest tier price in USD (e.g., 32)"
     },
     cutOffHours: {
       type: Type.NUMBER,
@@ -319,15 +302,15 @@ const TOUR_EXTRACTION_SCHEMA = {
     },
     meetingPoint: {
       type: Type.STRING,
-      description: "Default meeting point (e.g., 'Your Hotel')"
+      description: "Default meeting point (e.g., 'Your Hotel Lobby in Bali')"
     },
     latitude: {
       type: Type.NUMBER,
-      description: "Approximate latitude of the destination (e.g., -8.2303556)"
+      description: "Approximate latitude of the destination (e.g., -8.2425556)"
     },
     longitude: {
       type: Type.NUMBER,
-      description: "Approximate longitude of the destination (e.g., 115.3877491)"
+      description: "Approximate longitude of the destination (e.g., 115.3789491)"
     },
     highlights: {
       type: Type.ARRAY,
@@ -350,7 +333,7 @@ const TOUR_EXTRACTION_SCHEMA = {
       type: Type.ARRAY,
       items: { type: Type.STRING },
       description:
-        "Array of 24-hour departure times in HH:MM format (e.g., ['03:00', '03:30', '04:00'])"
+        "Array of 24-hour departure times in HH:MM format (e.g., ['02:30', '03:00', '03:30'])"
     },
     infoSections: {
       type: Type.ARRAY,
@@ -395,19 +378,37 @@ const TOUR_EXTRACTION_SCHEMA = {
         type: Type.OBJECT,
         properties: {
           name: { type: Type.STRING },
-          description: { type: Type.STRING },
-          details: { type: Type.STRING },
+          description: {
+            type: Type.STRING,
+            description: "1-sentence positioning summary of the package"
+          },
+          details: {
+            type: Type.STRING,
+            description: "1-sentence specific summary of what the package includes"
+          },
           inclusions: {
             type: Type.ARRAY,
             items: { type: Type.STRING }
           },
           exclusions: {
             type: Type.ARRAY,
-            items: { type: Type.STRING }
+            items: { type: Type.STRING },
+            description:
+              "List of 3-4 exclusions ending with 'Check out package details for inclusion and exclusion!'"
           },
-          meetingPoint: { type: Type.STRING },
-          meetingPointType: { type: Type.STRING },
-          pickupAreas: { type: Type.STRING },
+          meetingPoint: {
+            type: Type.STRING,
+            description: "Use 'Hotel Lobby'"
+          },
+          meetingPointType: {
+            type: Type.STRING,
+            description: "Use 'pickup'"
+          },
+          pickupAreas: {
+            type: Type.STRING,
+            description:
+              "e.g. 'Ubud, Sanur, Kuta, Seminyak, Canggu, Nusa Dua, Jimbaran'"
+          },
           tiers: {
             type: Type.ARRAY,
             items: {
@@ -439,20 +440,6 @@ const TOUR_EXTRACTION_SCHEMA = {
           "tiers"
         ]
       }
-    },
-    addOns: {
-      type: Type.ARRAY,
-      description: "3 optional add-ons (Lunch, Breakfast, Photographer)",
-      items: {
-        type: Type.OBJECT,
-        properties: {
-          name: { type: Type.STRING },
-          price: { type: Type.NUMBER },
-          unit: { type: Type.STRING },
-          description: { type: Type.STRING }
-        },
-        required: ["name", "price", "unit", "description"]
-      }
     }
   },
   required: [
@@ -483,11 +470,11 @@ function buildOpenStreetMapEmbedUrl(lat: number, lng: number): string {
   const safeLat =
     typeof lat === "number" && !Number.isNaN(lat) && lat !== 0
       ? lat
-      : -8.2303556;
+      : -8.2425556;
   const safeLng =
     typeof lng === "number" && !Number.isNaN(lng) && lng !== 0
       ? lng
-      : 115.3877491;
+      : 115.3789491;
   const delta = 0.00005;
   const minLng = (safeLng - delta).toFixed(7);
   const minLat = (safeLat - delta).toFixed(7);
@@ -520,7 +507,6 @@ async function generateStructuredTourWithFallback(
     } catch (err: any) {
       lastError = err;
       const msg = String(err?.message || "");
-      // If model is not found on external deployment, try next model alias
       if (
         msg.includes("404") ||
         msg.includes("NOT_FOUND") ||
@@ -586,22 +572,26 @@ export async function processTourExtraction(
   const extractionPrompt = `You are a specialist OTA Tour Data Architect. Convert the provided OTA URL data and/or user prompt into a complete, rich Tour JSON object that follows our exact Firestore tour schema.
 
 REFERENCE STYLE & STRUCTURE RULES:
-1. Tone & Copy: Write warm, evocative, sensory-rich travel copy ("Escape the usual tourist tracks...", detailed step-by-step itinerary descriptions, clear package descriptions).
-2. Slug: Lowercase kebab-case ending with a 4-digit number (e.g. "bali-mount-batur-sunrise-jeep-black-lava-with-hot-springs-1486"). If the URL has a tour ID number (like t1486033 -> 1486, or t392586 -> 3925), use 4 digits from it.
+1. Tone & Copy: Write warm, evocative, sensory-rich travel copy ("Escape the predawn chill...", detailed step-by-step itinerary descriptions, clear package descriptions).
+2. Slug: Lowercase kebab-case ending with two 4-digit numbers (e.g. "bali-mount-batur-sunrise-jeep-black-lava-with-hot-springs-1486-1920").
 3. InfoSections: Must have 3 sections in this exact pattern:
-   - Section 1 title: " Before You Book" (note leading space, 6-8 bullet items covering minimum booking, English speaking driver, health restrictions, private/group info)
-   - Section 2 title: "" (empty string title, 2 bullet items covering what to wear/bring and temperature/shoes)
-   - Section 3 title: "Other Think You Have To Know" (5 bullet items covering 24h cancellation refund, weather policy, 30% deposit via bank transfer/Wise/Remitly, balance in USD/IDR cash on arrival, travel insurance)
-4. Inclusions & Exclusions: End both arrays with the exact string: "Check out package details for inclusion and exclusion!"
+   - Section 1 title: " Before You Book" (note leading space, 6 bullet items covering minimum booking of 1 participant, private hotel pick-up across Kuta/Seminyak/Legian/Canggu/Sanur/Ubud/Nusa Dua/Jimbaran, English-speaking private driver greeting in hotel lobby, health/pregnancy notices, elevation/temperature notes, and child seats)
+   - Section 2 title: "" (empty string title, 2 bullet items: "What to bring: ..." and "Weather notice: ...")
+   - Section 3 title: "Other Think You Have To Know" (5 bullet items covering 100% refund 24h prior, inclement weather policy, 30% deposit via bank transfer/Wise/Remitly, balance in USD or IDR cash upon pick-up, and comprehensive travel accident insurance)
+4. Inclusions & Exclusions: End both top-level arrays AND each package's exclusions array with the exact string: "Check out package details for inclusion and exclusion!"
 5. Itinerary: 6 chronological steps on day 1.
    - Step 1 MUST be titled "Pick up from the hotel" with a pickupDescription (e.g. "Pick up from your hotel at 03:00" or appropriate start time).
    - Middle steps cover the core experience stops with vivid 2-3 sentence descriptions.
    - Final step MUST be titled "Back to hotel".
-6. Packages: Generate 3 distinct packages ("Easy Package", "Comfy Package", "Exclusive Package"), each with 4 participant pricing tiers:
-   - Tier 1: minParticipants: 1, maxParticipants: 1
-   - Tier 2: minParticipants: 2, maxParticipants: 3
-   - Tier 3: minParticipants: 4, maxParticipants: 5
-   - Tier 4: minParticipants: 6, maxParticipants: 10
+6. Packages: Generate 3 distinct packages ("Easy Package", "Comfy Package", "Exclusive Package"):
+   - meetingPoint: "Hotel Lobby"
+   - meetingPointType: "pickup"
+   - pickupAreas: "Ubud, Sanur, Kuta, Seminyak, Canggu, Nusa Dua, Jimbaran" (and add ", Uluwatu" on Exclusive Package)
+   - 4 participant pricing tiers:
+     * Tier 1: minParticipants: 1, maxParticipants: 1
+     * Tier 2: minParticipants: 2, maxParticipants: 3
+     * Tier 3: minParticipants: 4, maxParticipants: 5
+     * Tier 4: minParticipants: 6, maxParticipants: 10
 
 SOURCE INPUT FROM USER:
 ${trimmedInput}
@@ -627,164 +617,140 @@ ${scrapedContext ? `SCRAPED URL METADATA:\n${scrapedContext}\n` : ""}`;
         if (index === 0) {
           return {
             description: step.description || "",
+            title: step.title || "Pick up from the hotel",
             day: typeof step.day === "number" ? step.day : 1,
             pickup: {
               description:
                 step.pickupDescription ||
-                `Pick up from your hotel at ${parsed.timeSlots?.[0] || "08:00"}`
-            },
-            title: step.title || "Pick up from the hotel"
+                `Pick up from your hotel at ${parsed.timeSlots?.[0] || "03:00"}`
+            }
           };
         }
         return {
+          image: "",
+          title: step.title || `Stop ${index + 1}`,
           description: step.description || "",
-          image:
-            SAMPLE_ITINERARY_IMAGES[
-              (index - 1) % SAMPLE_ITINERARY_IMAGES.length
-            ],
-          day: typeof step.day === "number" ? step.day : 1,
-          title: step.title || `Stop ${index + 1}`
+          day: typeof step.day === "number" ? step.day : 1
         };
       })
     : [];
-
-  const formattedAddOns: TourAddOn[] =
-    Array.isArray(parsed.addOns) && parsed.addOns.length > 0
-      ? parsed.addOns.map((addon: any, idx: number) => ({
-          unit: addon.unit || "per person",
-          description: addon.description ?? "",
-          name: addon.name || `Add-On ${idx + 1}`,
-          price: typeof addon.price === "number" ? addon.price : 20,
-          id: DEFAULT_ADDON_IDS[idx] || `addon_${idx + 1}`,
-          tenantId: safeDefaults.tenantId
-        }))
-      : [
-          {
-            unit: "per person",
-            description: "",
-            name: "Lunch",
-            price: 20,
-            id: "6jBRtjCwQSmfS94SRfMg",
-            tenantId: safeDefaults.tenantId
-          },
-          {
-            tenantId: safeDefaults.tenantId,
-            price: 20,
-            unit: "per person",
-            id: "J0BYE6VpWxtWXy5RKPF9",
-            description: "",
-            name: "Breakfast"
-          },
-          {
-            description: "",
-            tenantId: safeDefaults.tenantId,
-            id: "febIYN0KXRuQD2DveVQL",
-            unit: "per booking",
-            price: 100,
-            name: "Photographer"
-          }
-        ];
 
   const locationMapUrl = buildOpenStreetMapEmbedUrl(
     parsed.latitude,
     parsed.longitude
   );
 
+  // Exact top-level key order matching jsonfiles_f96e158d.json
   const finalTour: TourDocument = {
-    supplierId: safeDefaults.supplierId || "",
-    updatedAt: {
-      type: "firestore/timestamp/1.0",
-      seconds: nowSeconds,
-      nanoseconds: 192000000
-    },
+    title: parsed.title || "Untitled Tour Experience",
+    duration: parsed.duration || "8-10 Hours",
+    gallery: [],
+    infoSections: Array.isArray(parsed.infoSections)
+      ? parsed.infoSections.map((sec: any) => ({
+          title: sec.title ?? "",
+          content: Array.isArray(sec.content) ? sec.content : []
+        }))
+      : [],
     description: parsed.description || "",
+    imageLabelId: safeDefaults.imageLabelId,
+    highlights: Array.isArray(parsed.highlights) ? parsed.highlights : [],
+    priceLabelId: "",
+    supplierName: safeDefaults.supplierName || "",
+    status: safeDefaults.status || "published",
+    multiDayGuides: [],
+    exclusions: Array.isArray(parsed.exclusions) ? parsed.exclusions : [],
+    supplierId: safeDefaults.supplierId || "",
+    transports: [],
+    featuredImage: "",
+    labelIds: [safeDefaults.imageLabelId],
+    cutOffHours:
+      typeof parsed.cutOffHours === "number"
+        ? parsed.cutOffHours
+        : safeDefaults.cutOffHours,
+    regularPrice:
+      typeof parsed.regularPrice === "number" ? parsed.regularPrice : 85,
+    languages: [],
+    discountPrice:
+      typeof parsed.discountPrice === "number" ? parsed.discountPrice : 32,
+    addOnIds: DEFAULT_ADDON_IDS,
+    faqs: [],
     tourTypeId: "",
-    transportIds: [safeDefaults.primaryTransportId],
+    itinerary: formattedItinerary,
+    createdAt: {
+      type: "firestore/timestamp/1.0",
+      seconds: nowSeconds - 355,
+      nanoseconds: 349000000
+    },
+    belowTitleLabelId: "",
     slug:
       parsed.slug ||
       `${(parsed.title || "bali-private-tour")
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "")}-1839`,
-    title: parsed.title || "Untitled Tour Experience",
-    languages: [],
-    multiDayGuides: [],
-    imageLabelId: safeDefaults.imageLabelId,
-    gallery: DEFAULT_GALLERY,
-    tenantId: safeDefaults.tenantId,
-    labelIds: [safeDefaults.imageLabelId],
-    location: parsed.location || "Bali",
-    infoSections: Array.isArray(parsed.infoSections)
-      ? parsed.infoSections.map((sec: any) => ({
-          content: Array.isArray(sec.content) ? sec.content : [],
-          title: sec.title ?? ""
-        }))
-      : [],
-    addOnIds: DEFAULT_ADDON_IDS,
-    createdAt: {
-      type: "firestore/timestamp/1.0",
-      seconds: nowSeconds - 3600,
-      nanoseconds: 562000000
-    },
-    status: safeDefaults.status || "published",
-    transports: [],
-    priceLabelId: "",
-    regularPrice:
-      typeof parsed.regularPrice === "number" ? parsed.regularPrice : 100,
-    cutOffHours:
-      typeof parsed.cutOffHours === "number"
-        ? parsed.cutOffHours
-        : safeDefaults.cutOffHours,
-    importantInfo: parsed.importantInfo || "",
-    multiDayItinerary: [],
-    highlights: Array.isArray(parsed.highlights) ? parsed.highlights : [],
-    duration: parsed.duration || "6-8 Hours",
-    locationId: safeDefaults.locationId,
-    cutOffNotice: "",
-    tourDurationType: parsed.tourDurationType || "single_day",
-    addOns: formattedAddOns,
-    exclusions: Array.isArray(parsed.exclusions) ? parsed.exclusions : [],
-    slotCapacity: 0,
-    discountPrice:
-      typeof parsed.discountPrice === "number" ? parsed.discountPrice : 19,
-    supplierName: safeDefaults.supplierName || "",
-    featuredImage: "/api/uploads/FQRNDs8llr6LOi49CLO7",
-    belowTitleLabelId: "",
-    inclusions: Array.isArray(parsed.inclusions) ? parsed.inclusions : [],
-    categoryId: safeDefaults.categoryId,
-    itinerary: formattedItinerary,
-    meetingPoint: parsed.meetingPoint || "Your Hotel",
-    faqs: [],
-    accommodations: [],
-    locationMapUrl,
-    packages: Array.isArray(parsed.packages)
-      ? parsed.packages.map((pkg: any, idx: number) => ({
-          exclusions: Array.isArray(pkg.exclusions) ? pkg.exclusions : [],
-          tiers: Array.isArray(pkg.tiers)
-            ? pkg.tiers.map((t: any) => ({
-                childPrice: Number(t.childPrice ?? 19),
-                maxParticipants: Number(t.maxParticipants ?? 1),
-                minParticipants: Number(t.minParticipants ?? 1),
-                adultPrice: Number(t.adultPrice ?? 50)
-              }))
-            : [],
-          details: pkg.details || pkg.description || "",
-          inclusions: Array.isArray(pkg.inclusions) ? pkg.inclusions : [],
-          name: pkg.name || `Package ${idx + 1}`,
-          transportIds: safeDefaults.packageTransportIds,
-          meetingPoint:
-            pkg.meetingPoint ||
-            "Toya Devasya\nhttps://maps.app.goo.gl/uU8hcZVc417nfjUp9",
-          description: pkg.description || pkg.details || "",
-          pickupAreas:
-            pkg.pickupAreas || "Most area are covered for pick up and drop off",
-          meetingPointType: pkg.meetingPointType || "Meeting Point"
-        }))
-      : [],
+        .replace(/(^-|-$)/g, "")}-1486-1920`,
     timeSlots: Array.isArray(parsed.timeSlots)
       ? parsed.timeSlots
-      : ["03:00", "03:30", "04:00"],
-    maxCapacity: 0
+      : ["02:30", "03:00", "03:30"],
+    cutOffNotice: "",
+    multiDayItinerary: [],
+    transportIds: [safeDefaults.primaryTransportId],
+    tourDurationType: parsed.tourDurationType || "single_day",
+    accommodations: [],
+    maxCapacity: 0,
+    updatedAt: {
+      type: "firestore/timestamp/1.0",
+      seconds: nowSeconds,
+      nanoseconds: 155000000
+    },
+    location: parsed.location || "Kintamani",
+    categoryId: safeDefaults.categoryId,
+    locationMapUrl,
+    tenantId: safeDefaults.tenantId,
+    meetingPoint: parsed.meetingPoint || "Your Hotel Lobby in Bali",
+    importantInfo: parsed.importantInfo || "",
+    addOns: [],
+    packages: Array.isArray(parsed.packages)
+      ? parsed.packages.map((pkg: any, idx: number) => {
+          const rawExclusions: string[] = Array.isArray(pkg.exclusions)
+            ? pkg.exclusions
+            : [];
+          const exclusionsWithFooter = rawExclusions.some((e) =>
+            String(e).toLowerCase().includes("check out package details")
+          )
+            ? rawExclusions
+            : [
+                ...rawExclusions,
+                "Check out package details for inclusion and exclusion!"
+              ];
+
+          return {
+            meetingPoint: pkg.meetingPoint || "Hotel Lobby",
+            exclusions: exclusionsWithFooter,
+            transportIds: safeDefaults.packageTransportIds,
+            name: pkg.name || `Package ${idx + 1}`,
+            pickupAreas:
+              pkg.pickupAreas ||
+              (idx === 2
+                ? "Ubud, Sanur, Kuta, Seminyak, Canggu, Nusa Dua, Jimbaran, Uluwatu"
+                : "Ubud, Sanur, Kuta, Seminyak, Canggu, Nusa Dua, Jimbaran"),
+            meetingPointType: pkg.meetingPointType || "pickup",
+            tiers: Array.isArray(pkg.tiers)
+              ? pkg.tiers.map((t: any) => ({
+                  childPrice: Number(t.childPrice ?? 25),
+                  adultPrice: Number(t.adultPrice ?? 50),
+                  maxParticipants: Number(t.maxParticipants ?? 1),
+                  minParticipants: Number(t.minParticipants ?? 1)
+                }))
+              : [],
+            details: pkg.details || pkg.description || "",
+            description: pkg.description || pkg.details || "",
+            inclusions: Array.isArray(pkg.inclusions) ? pkg.inclusions : []
+          };
+        })
+      : [],
+    inclusions: Array.isArray(parsed.inclusions) ? parsed.inclusions : [],
+    slotCapacity: 0,
+    locationId: safeDefaults.locationId
   };
 
   return {
